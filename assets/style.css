@@ -112,11 +112,14 @@ ul.materials a {
 
 ul.materials a:hover { text-decoration: underline; }
 
-ul.materials a.sol {
+ul.materials a.sol,
+ul.materials .sol {
   font-weight: 400;
   font-size: 0.9rem;
   color: var(--muted);
 }
+
+ul.materials .pending { font-style: italic; }
 
 footer {
   border-top: 1px solid var(--border);

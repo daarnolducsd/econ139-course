@@ -39,8 +39,22 @@ Optional commit message: `./publish.sh "Add automation lecture"`
 
 ## Common edits (all in `build.py`)
 
-- **Release a pset's solutions:** add its folder name to `RELEASE_SOLUTIONS`,
-  e.g. `RELEASE_SOLUTIONS = {"pset1"}`. Remove it to take them down again.
+- **Release a pset's solutions (with a date):** add the pset to
+  `SOLUTION_RELEASE` with a date, e.g.
+
+  ```python
+  SOLUTION_RELEASE = {
+      "pset1": "2026-02-15",   # auto-publishes on/after this date
+      "pset2": None,           # publish immediately
+      # pset3 omitted          # stays private
+  }
+  ```
+
+  Before the date, the site shows a muted "solutions available February 15,
+  2026" note next to that pset. Because the site is static, a dated release
+  takes effect the next time you run `./publish.sh` **on or after** that date —
+  run it that morning (or any time after) and the solutions go live. Remove a
+  pset from the map to take its solutions down again.
 - **Nicer slide titles:** add a `"filename_stem": "Display Name"` entry to
   `SLIDE_TITLES`. Files not listed get an auto-generated title.
 - **Course info / textbook link:** edit the constants at the top.

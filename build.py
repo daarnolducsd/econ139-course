@@ -12,6 +12,7 @@ To add a new lecture: drop the PDF in ../slides/ and re-run. To give it a
 nicer name on the site, add an entry to SLIDE_TITLES below.
 """
 
+import datetime
 import html
 import os
 import re
@@ -26,9 +27,21 @@ TERM = "Fall 2025"
 INSTRUCTOR = "David Arnold"
 TEXTBOOK_URL = "https://daarnolducsd.github.io/econ139/index.html"
 
-# Which problem set solutions are released to students. Add the folder name
-# (e.g. "pset1") to publish that set's solutions; leave empty for none.
-RELEASE_SOLUTIONS = set()  # e.g. {"pset1", "pset2"}
+# Problem set solutions: control when each set's solutions go public.
+# Map the pset folder name to a release date "YYYY-MM-DD". Solutions are
+# published only once that date has arrived (checked when build.py runs).
+#   - Use None (or "") to release immediately.
+#   - Omit a pset entirely to keep its solutions private indefinitely.
+# Before the date, the site shows a muted "solutions available <date>" note.
+#
+# NOTE: the site is static, so a dated release only takes effect the next time
+# you run ./publish.sh on or after that date. Run it that morning (or any time
+# after) and the solutions appear.
+SOLUTION_RELEASE = {
+    # "pset1": "2026-02-15",
+    # "pset2": "2026-03-01",
+    # "pset3": None,            # available now
+}
 
 # Optional nice display names for slide files (filename without .pdf).
 # Anything not listed here gets an auto-generated title.
@@ -143,6 +156,23 @@ def collect_slides():
     return lectures, reviews, datasets
 
 
+def fmt_date(d):
+    return f"{d.strftime('%B')} {d.day}, {d.year}"
+
+
+def solution_status(name):
+    """Return ('released', None) / ('pending', date) / ('private', None)."""
+    if name not in SOLUTION_RELEASE:
+        return "private", None
+    when = SOLUTION_RELEASE[name]
+    if not when:
+        return "released", None
+    due = datetime.date.fromisoformat(when)
+    if datetime.date.today() >= due:
+        return "released", None
+    return "pending", due
+
+
 def collect_psets():
     reset_dir(OUT_PSETS)
     psets = []
@@ -159,11 +189,16 @@ def collect_psets():
             "title": f"Problem Set {m.group(1)}" if m else name,
             "href": f"psets/{name}.pdf",
             "sol_href": None,
+            "sol_pending": None,
         }
         sol = os.path.join(folder, f"{name}_solutions.pdf")
-        if name in RELEASE_SOLUTIONS and os.path.isfile(sol):
+        status, due = solution_status(name)
+        if status == "released" and os.path.isfile(sol):
             shutil.copy2(sol, os.path.join(OUT_PSETS, f"{name}_solutions.pdf"))
             entry["sol_href"] = f"psets/{name}_solutions.pdf"
+        elif status == "pending":
+            entry["sol_pending"] = fmt_date(due)
+        entry["status"] = status
         psets.append(entry)
     return psets
 
@@ -198,6 +233,9 @@ def render(lectures, reviews, datasets, psets, syllabus):
         extra = ""
         if p["sol_href"]:
             extra = f' &nbsp;<a class="sol" href="{esc(p["sol_href"])}">solutions</a>'
+        elif p["sol_pending"]:
+            extra = (f' &nbsp;<span class="sol pending">solutions available '
+                     f'{esc(p["sol_pending"])}</span>')
         pset_items.append(li_link(p["title"], p["href"], extra))
     pset_items = "\n".join(pset_items)
 
@@ -284,8 +322,12 @@ def main():
     print(f"  lectures : {len(lectures)}")
     print(f"  reviews  : {len(reviews)}")
     print(f"  datasets : {len(datasets)}")
-    print(f"  psets    : {len(psets)} "
-          f"(solutions released: {sorted(RELEASE_SOLUTIONS) or 'none'})")
+    released = [p["title"] for p in psets if p["sol_href"]]
+    pending = [f'{p["title"]} -> {p["sol_pending"]}'
+               for p in psets if p["sol_pending"]]
+    print(f"  psets    : {len(psets)}")
+    print(f"    released  : {released or 'none'}")
+    print(f"    pending   : {pending or 'none'}")
     print(f"  syllabus : {'yes' if syllabus else 'missing'}")
 
 
