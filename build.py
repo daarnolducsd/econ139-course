@@ -67,6 +67,27 @@ SLIDE_TITLES = {
     "data_03_onet": "O*NET",
 }
 
+# Lecture topics, in display order. Each topic groups one or more slide decks
+# shown together on one table row. Each deck is (filename_stem, short_label).
+# Any lecture PDF in ../slides that is NOT listed here still appears, as its
+# own topic row, using its auto-generated title.
+TOPICS = [
+    ("Introduction", [("00_intro", "Slides")]),
+    ("Perfect Competition", [("01_perfect_competition", "Slides")]),
+    ("Minimum Wage", [("02_min_wage", "Slides")]),
+    ("Monopsony", [("03_monopsony_theory", "Theory"),
+                   ("04_monopsony_empirics", "Empirics")]),
+    ("Human Capital", [("05_human_capital", "Part 1"),
+                       ("06_human_capital_part_2", "Part 2")]),
+    ("Tasks", [("07_tasks", "Slides")]),
+    ("Automation", [("08_automation_part1", "Part 1"),
+                    ("09_automation_part2", "Part 2")]),
+    ("Labor Supply", [("10_labor_supply_part1", "Part 1"),
+                      ("11_labor_supply_part2", "Part 2")]),
+    ("Trade", [("12_trade_part1", "Part 1"),
+               ("13_trade_part2", "Part 2")]),
+]
+
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
@@ -136,24 +157,39 @@ def collect_slides():
     os.makedirs(OUT_DATASET, exist_ok=True)
 
     stems = copy_pdfs(SRC_SLIDES, OUT_SLIDES)
-    lectures, reviews = [], []
-    for stem in stems:
-        item = {"stem": stem, "title": pretty_title(stem), "href": f"slides/{stem}.pdf"}
-        if lecture_number(stem) is not None:
-            item["num"] = lecture_number(stem)
-            lectures.append(item)
-        else:
-            reviews.append(item)
-    lectures.sort(key=lambda x: x["num"])
-    # Midterm review before Final review.
-    reviews.sort(key=lambda x: ("final" in x["stem"].lower(), x["stem"].lower()))
+    present = set(stems)
+
+    # Group lecture decks into topics, keeping only decks that exist.
+    topics, used = [], set()
+    for topic, decks in TOPICS:
+        items = []
+        for stem, label in decks:
+            if stem in present:
+                items.append({"label": label, "href": f"slides/{stem}.pdf"})
+                used.add(stem)
+        if items:
+            topics.append({"topic": topic, "items": items})
+
+    # Numbered lecture decks not covered by TOPICS -> their own topic rows.
+    leftover = [s for s in stems
+                if s not in used and lecture_number(s) is not None]
+    leftover.sort(key=lambda s: lecture_number(s))
+    for s in leftover:
+        topics.append({"topic": pretty_title(s),
+                       "items": [{"label": "Slides", "href": f"slides/{s}.pdf"}]})
+
+    # Everything else with no lecture number = exam reviews etc.
+    reviews = [{"title": pretty_title(s), "href": f"slides/{s}.pdf"}
+               for s in stems
+               if s not in used and lecture_number(s) is None]
+    reviews.sort(key=lambda x: ("final" in x["href"].lower(), x["href"].lower()))
 
     dataset_stems = copy_pdfs(SRC_DATASET, OUT_DATASET)
     datasets = [
         {"title": pretty_title(s), "href": f"slides/dataset/{s}.pdf"}
         for s in dataset_stems
     ]
-    return lectures, reviews, datasets
+    return topics, reviews, datasets
 
 
 def fmt_date(d):
@@ -221,10 +257,17 @@ def li_link(title, href, extra=""):
     )
 
 
-def render(lectures, reviews, datasets, psets, syllabus):
-    lecture_items = "\n".join(
-        li_link(f'{it["num"]}. {it["title"]}', it["href"]) for it in lectures
-    )
+def render(topics, reviews, datasets, psets, syllabus):
+    rows = []
+    for t in topics:
+        links = '<span class="sep">/</span>'.join(
+            f'<a href="{esc(it["href"])}">{esc(it["label"])}</a>'
+            for it in t["items"]
+        )
+        rows.append(f'        <tr><th scope="row">{esc(t["topic"])}</th>'
+                    f'<td>{links}</td></tr>')
+    topic_rows = "\n".join(rows)
+
     review_items = "\n".join(li_link(it["title"], it["href"]) for it in reviews)
     dataset_items = "\n".join(li_link(it["title"], it["href"]) for it in datasets)
 
@@ -255,10 +298,6 @@ def render(lectures, reviews, datasets, psets, syllabus):
 {dataset_items}
     </ul>"""
 
-    syllabus_link = (
-        f'<a href="{esc(syllabus)}">Syllabus (PDF)</a>' if syllabus else ""
-    )
-
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -271,26 +310,40 @@ def render(lectures, reviews, datasets, psets, syllabus):
   <header>
     <div class="wrap">
       <h1>{esc(COURSE_TITLE)}</h1>
-      <p class="sub">{esc(TERM)} &middot; {esc(INSTRUCTOR)}
-        {(" &middot; " + syllabus_link) if syllabus_link else ""}</p>
+      <p class="sub">{esc(TERM)} &middot; {esc(INSTRUCTOR)}</p>
     </div>
   </header>
 
+  <nav class="topnav">
+    <div class="wrap">
+      <a href="#textbook">Textbook</a>
+      <a href="#slides">Lecture Slides</a>
+      <a href="#psets">Problem Sets</a>
+      <a href="{esc(TEXTBOOK_URL)}">Textbook Site &#8599;</a>
+      {(f'<a href="{esc(syllabus)}">Syllabus</a>') if syllabus else ""}
+    </div>
+  </nav>
+
   <main class="wrap">
-    <section class="card highlight">
+    <section id="textbook" class="card highlight">
       <h2>Textbook</h2>
       <p>The full course textbook is available online and updated continuously.</p>
       <p><a class="button" href="{esc(TEXTBOOK_URL)}">Open the textbook &rarr;</a></p>
     </section>
 
-    <section class="card">
+    <section id="slides" class="card">
       <h2>Lecture Slides</h2>
-      <ul class="materials">
-{lecture_items}
-      </ul>{review_block}{dataset_block}
+      <table class="slides">
+        <thead>
+          <tr><th scope="col">Topic</th><th scope="col">Slides</th></tr>
+        </thead>
+        <tbody>
+{topic_rows}
+        </tbody>
+      </table>{review_block}{dataset_block}
     </section>
 
-    <section class="card">
+    <section id="psets" class="card">
       <h2>Problem Sets</h2>
       <ul class="materials">
 {pset_items}
@@ -309,17 +362,18 @@ def render(lectures, reviews, datasets, psets, syllabus):
 
 
 def main():
-    lectures, reviews, datasets = collect_slides()
+    topics, reviews, datasets = collect_slides()
     psets = collect_psets()
     syllabus = collect_syllabus()
-    page = render(lectures, reviews, datasets, psets, syllabus)
+    page = render(topics, reviews, datasets, psets, syllabus)
     with open(os.path.join(SITE, "index.html"), "w") as f:
         f.write(page)
     # .nojekyll keeps GitHub Pages from ignoring files; harmless if present.
     open(os.path.join(SITE, ".nojekyll"), "w").close()
 
+    n_decks = sum(len(t["items"]) for t in topics)
     print(f"Built index.html")
-    print(f"  lectures : {len(lectures)}")
+    print(f"  topics   : {len(topics)} ({n_decks} lecture decks)")
     print(f"  reviews  : {len(reviews)}")
     print(f"  datasets : {len(datasets)}")
     released = [p["title"] for p in psets if p["sol_href"]]

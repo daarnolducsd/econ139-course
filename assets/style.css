@@ -1,16 +1,18 @@
 :root {
-  --bg: #f7f8fa;
+  --bg: #f1f8fe;
   --card: #ffffff;
-  --ink: #1c2733;
-  --muted: #5a6b7b;
-  --accent: #18558a;
-  --accent-dark: #0f3a61;
-  --border: #e2e7ec;
+  --ink: #14344f;
+  --muted: #5c7892;
+  --accent: #2f86d6;
+  --accent-dark: #1f6cb5;
+  --border: #d7e8f5;
+  --header-1: #cfe7fb;
+  --header-2: #a9d3f6;
 }
 
 * { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 
 body {
   margin: 0;
@@ -28,8 +30,8 @@ body {
 }
 
 header {
-  background: var(--accent);
-  color: #fff;
+  background: linear-gradient(160deg, var(--header-1) 0%, var(--header-2) 100%);
+  color: var(--ink);
   padding: 2.4rem 0 2rem;
 }
 
@@ -41,13 +43,41 @@ header h1 {
 
 header .sub {
   margin: 0.4rem 0 0;
-  color: #d7e6f2;
+  color: #2c5474;
   font-size: 1.02rem;
 }
 
-header .sub a { color: #fff; text-decoration: underline; }
+header .sub a { color: var(--accent-dark); }
+
+/* Sticky top navigation */
+.topnav {
+  background: var(--accent);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 4px rgba(20, 50, 80, 0.15);
+}
+
+.topnav .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6rem;
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+}
+
+.topnav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.topnav a:hover { text-decoration: underline; }
 
 main { padding: 2rem 0 1rem; }
+
+section[id] { scroll-margin-top: 3.5rem; }
 
 .card {
   background: var(--card);
@@ -120,6 +150,47 @@ ul.materials .sol {
 }
 
 ul.materials .pending { font-style: italic; }
+
+/* Topic / slides table */
+table.slides {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table.slides th,
+table.slides td {
+  text-align: left;
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+table.slides tr:last-child th,
+table.slides tr:last-child td { border-bottom: none; }
+
+table.slides thead th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+table.slides tbody th {
+  font-weight: 600;
+  color: var(--ink);
+  width: 42%;
+}
+
+table.slides td a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+table.slides td a:hover { text-decoration: underline; }
+
+table.slides td .sep { color: var(--border); padding: 0 0.15rem; }
 
 footer {
   border-top: 1px solid var(--border);
