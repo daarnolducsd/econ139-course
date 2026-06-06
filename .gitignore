@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# SAFETY NOTE
+# -----------
+# This repo (website/) contains ONLY generated public output. All sensitive
+# material -- grades, exams, and pset solutions -- lives in the PARENT folder
+# (../grades, ../midterm, ../final, ../pset/*/*_solutions.pdf), outside this
+# repo, so it is never tracked by git here.
+#
+# build.py wipes and repopulates slides/, psets/, and syllabus/ on every run,
+# copying only the specific public files it is told to. A pset's solutions are
+# copied in ONLY when its name is listed in RELEASE_SOLUTIONS in build.py.
+#
+# The patterns below are a backstop against anyone ever dropping a sensitive
+# folder directly inside website/ by mistake. (Note: pset solution PDFs are
+# intentionally NOT ignored, because the release toggle must be able to ship
+# them when you choose to.)
+grades/
+midterm/
+final/
+*answer_key*
