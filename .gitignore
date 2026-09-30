@@ -6,7 +6,7 @@ __pycache__/
 *.py[cod]
 .build-*
 
-# Public PDFs are explicitly mapped in course.json. Sensitive course folders
+# Public PDFs, data, and code are explicitly mapped in course.json. Sensitive course folders
 # remain outside this repository. Solution PDFs are intentionally not ignored:
 # a release entry must be able to publish them when requested.
 grades/

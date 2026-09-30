@@ -8,12 +8,16 @@ usage() {
 Usage (from the ECON139 folder):
   ./website/publish.sh ["commit message"]  Build, commit, and push to GitHub
   ./website/publish.sh --check             Validate/report changes; no writes
+  ./website/publish.sh --sources           Show exact source files to edit
   ./website/publish.sh --local             Build locally; no commit or push
   ./website/publish.sh --preview           Build and serve at localhost:8000
   ./website/publish.sh --help              Show this help
 
 Export edited slides to PDF in the original course folders first.
-Edit website/course.json only to add/reorder materials or change releases.
+Edit teaching code/data in materials/<topic>/code/ and data/.
+Individual downloads and topic ZIPs update together.
+Edit website/course.json to change source files and releases.
+Edit website/schedule.json to move materials between weeks.
 Use PORT=8001 ./website/publish.sh --preview to select another preview port.
 HELP
 }
@@ -25,6 +29,7 @@ fi
 
 case "${1:-}" in
   --help|-h) usage; exit 0 ;;
+  --sources) exec python3 build.py --sources ;;
   --check) exec python3 build.py --check ;;
   --local) exec python3 build.py ;;
   --preview)
@@ -51,7 +56,7 @@ fi
 # Do not include unrelated files that were already staged by another task.
 while IFS= read -r -d '' path; do
   case "$path" in
-    .gitignore|.nojekyll|AGENTS.md|README.md|PROJECT_NOTES.md|build.py|publish.sh|course.json|index.html|assets/*|slides/*|psets/*|syllabus/*|tests/*) ;;
+    .gitignore|.nojekyll|AGENTS.md|README.md|PROJECT_NOTES.md|SOURCE_FILES.md|build.py|publish.sh|course.json|schedule.json|index.html|assets/*|downloads/*|slides/*|psets/*|syllabus/*|tests/*) ;;
     *) echo "Unrelated file is staged: $path. Unstage it before publishing." >&2; exit 1 ;;
   esac
 done < <(git diff --cached --name-only -z)
@@ -60,8 +65,11 @@ echo "Validating and building..."
 python3 build.py
 
 # Explicit paths: an unrelated file in the repo root is not automatically added.
+if [[ -d downloads ]] || [[ -n "$(git ls-files -- downloads)" ]]; then
+  git add -A -- downloads
+fi
 git add -A -- .gitignore .nojekyll AGENTS.md README.md PROJECT_NOTES.md \
-  build.py publish.sh course.json index.html assets slides psets syllabus tests
+  build.py publish.sh course.json schedule.json index.html SOURCE_FILES.md assets slides psets syllabus tests
 
 if git diff --cached --quiet; then
   echo "No new changes to commit."

@@ -1,0 +1,274 @@
+{
+  "weeks": [
+    {
+      "number": 1,
+      "title": "Introduction, Perfect Competition & CPS",
+      "materials": [
+        "intro",
+        "perfect-competition",
+        "cps-guide"
+      ],
+      "readings": [
+        {
+          "title": "Chapter 1",
+          "url": "https://daarnolducsd.github.io/econ139/01.html"
+        },
+        {
+          "title": "Chapter 2",
+          "url": "https://daarnolducsd.github.io/econ139/02.html"
+        },
+        {
+          "title": "Brookings Article on Unemployment",
+          "url": "https://www.brookings.edu/articles/what-does-the-unemployment-rate-measure/"
+        }
+      ],
+      "assignments": [
+        {
+          "title": "First Day Survey",
+          "note": "Required financial-aid survey"
+        },
+        {
+          "title": "Reading Reflection 1"
+        }
+      ],
+      "resources": [
+        "cps-csv",
+        "cps-stata"
+      ]
+    },
+    {
+      "number": 2,
+      "title": "The Minimum Wage",
+      "materials": [
+        "cps-guide",
+        "minimum-wage",
+        "monopsony-theory"
+      ],
+      "readings": [
+        {
+          "title": "Chapter 3",
+          "url": "https://daarnolducsd.github.io/econ139/03.html"
+        }
+      ],
+      "assignments": [
+        {
+          "material": "pset1",
+          "note": "Assigned"
+        }
+      ],
+      "resources": [
+        "cps-csv",
+        "cps-stata",
+        "cps-python",
+        "cps-stata-code",
+        "cps-r"
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Monopsony Power",
+      "materials": [
+        "monopsony-theory",
+        "monopsony-empirics"
+      ],
+      "readings": [
+        {
+          "title": "Chapter 4",
+          "url": "https://daarnolducsd.github.io/econ139/04.html"
+        },
+        {
+          "title": "Chapter 5",
+          "url": "https://daarnolducsd.github.io/econ139/05.html"
+        },
+        {
+          "title": "Noncompetes by Evan Starr",
+          "url": "https://eig.org/wp-content/uploads/2023/10/Noncompete-Clauses-A-Policymakers-Guide.pdf",
+          "note": "Reading reflection based on this article"
+        }
+      ],
+      "assignments": [
+        {
+          "material": "pset1",
+          "note": "Due this week"
+        },
+        {
+          "title": "Reading Reflection 2",
+          "note": "Due this week"
+        }
+      ],
+      "resources": []
+    },
+    {
+      "number": 4,
+      "title": "Human Capital",
+      "materials": [
+        "human-capital-1",
+        "human-capital-2",
+        "acs-guide"
+      ],
+      "readings": [
+        {
+          "title": "Chapter 6",
+          "url": "https://daarnolducsd.github.io/econ139/06.html"
+        }
+      ],
+      "assignments": [
+        {
+          "title": "Practice Midterm"
+        },
+        {
+          "title": "Second Practice Midterm"
+        }
+      ],
+      "resources": [
+        "acs-excel",
+        "acs-stata",
+        "acs-csv",
+        "acs-stata-code",
+        "acs-python",
+        "acs-r"
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Midterm",
+      "materials": [
+        "midterm-review"
+      ],
+      "readings": [],
+      "assignments": [
+        {
+          "title": "Midterm Practice"
+        }
+      ],
+      "resources": []
+    },
+    {
+      "number": 6,
+      "title": "Technology: A Task Approach",
+      "materials": [
+        "tasks",
+        "onet-guide"
+      ],
+      "readings": [
+        {
+          "title": "Chapter 7",
+          "url": "https://daarnolducsd.github.io/econ139/07.html"
+        },
+        {
+          "title": "Acemoglu and Autor (2011), pp. 1044\u20131055",
+          "url": "https://shapingwork.mit.edu/wp-content/uploads/2023/10/Acemoglu-Autor-Jan-2011.pdf"
+        }
+      ],
+      "assignments": [
+        {
+          "title": "Reading Reflection 3"
+        },
+        {
+          "title": "Occupation presentation sign-up"
+        }
+      ],
+      "resources": [
+        "onet-excel",
+        "onet-stata",
+        "onet-csv"
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Technology: Automation",
+      "materials": [
+        "automation-1",
+        "automation-2"
+      ],
+      "readings": [
+        {
+          "title": "Chapter 8",
+          "url": "https://daarnolducsd.github.io/econ139/08.html"
+        }
+      ],
+      "assignments": [
+        {
+          "material": "pset2",
+          "note": "Assigned"
+        }
+      ],
+      "resources": []
+    },
+    {
+      "number": 8,
+      "title": "Labor Supply",
+      "materials": [
+        "labor-supply-1",
+        "labor-supply-2"
+      ],
+      "readings": [
+        {
+          "title": "Chapter 9",
+          "url": "https://daarnolducsd.github.io/econ139/09.html"
+        }
+      ],
+      "assignments": [
+        {
+          "material": "pset2",
+          "note": "Due this week"
+        },
+        {
+          "material": "pset3",
+          "note": "Assigned"
+        },
+        {
+          "title": "Occupation presentation draft",
+          "note": "Submit first draft"
+        }
+      ],
+      "resources": []
+    },
+    {
+      "number": 9,
+      "title": "Trade",
+      "materials": [
+        "trade-1"
+      ],
+      "readings": [
+        {
+          "title": "Chapter 10.1-10.3",
+          "url": "https://daarnolducsd.github.io/econ139/10.html"
+        }
+      ],
+      "assignments": [
+        {
+          "title": "Occupation presentation peer feedback",
+          "note": "Peer feedback"
+        }
+      ],
+      "resources": []
+    },
+    {
+      "number": 10,
+      "title": "Trade and Review",
+      "materials": [
+        "trade-1",
+        "trade-2",
+        "final-review"
+      ],
+      "readings": [
+        {
+          "title": "Chapter 10.3-10.5",
+          "url": "https://daarnolducsd.github.io/econ139/10.html"
+        }
+      ],
+      "assignments": [
+        {
+          "title": "Occupation presentation",
+          "note": "Submit final presentation"
+        },
+        {
+          "material": "pset3",
+          "note": "Due this week"
+        }
+      ],
+      "resources": []
+    }
+  ]
+}

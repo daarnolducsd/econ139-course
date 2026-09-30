@@ -5,135 +5,104 @@
     "instructor": "David Arnold",
     "textbook_url": "https://daarnolducsd.github.io/econ139/index.html"
   },
-  "lectures": [
-    {
-      "topic": "Introduction",
-      "decks": [
-        {
-          "label": "Slides",
-          "source": "slides/00_intro.pdf"
-        }
-      ]
+  "materials": {
+    "intro": {
+      "title": "Introduction",
+      "kind": "slides",
+      "source": "slides/00_intro.pdf"
     },
-    {
-      "topic": "Perfect Competition",
-      "decks": [
-        {
-          "label": "Slides",
-          "source": "slides/01_perfect_competition.pdf"
-        }
-      ]
+    "perfect-competition": {
+      "title": "Perfect Competition",
+      "kind": "slides",
+      "source": "slides/01_perfect_competition.pdf"
     },
-    {
-      "topic": "Minimum Wage",
-      "decks": [
-        {
-          "label": "Slides",
-          "source": "slides/02_min_wage.pdf"
-        }
-      ]
+    "minimum-wage": {
+      "title": "Minimum Wage",
+      "kind": "slides",
+      "source": "slides/02_min_wage.pdf"
     },
-    {
-      "topic": "Monopsony",
-      "decks": [
-        {
-          "label": "Theory",
-          "source": "slides/03_monopsony_theory.pdf"
-        },
-        {
-          "label": "Empirics",
-          "source": "slides/04_monopsony_empirics.pdf"
-        }
-      ]
+    "monopsony-theory": {
+      "title": "Monopsony: Theory",
+      "kind": "slides",
+      "source": "slides/03_monopsony_theory.pdf"
     },
-    {
-      "topic": "Human Capital",
-      "decks": [
-        {
-          "label": "Part 1",
-          "source": "slides/05_human_capital.pdf"
-        },
-        {
-          "label": "Part 2",
-          "source": "slides/06_human_capital_part_2.pdf"
-        }
-      ]
+    "monopsony-empirics": {
+      "title": "Monopsony: Empirics",
+      "kind": "slides",
+      "source": "slides/04_monopsony_empirics.pdf"
     },
-    {
-      "topic": "Tasks",
-      "decks": [
-        {
-          "label": "Slides",
-          "source": "slides/07_tasks.pdf"
-        }
-      ]
+    "human-capital-1": {
+      "title": "Human Capital: Part 1",
+      "kind": "slides",
+      "source": "slides/05_human_capital.pdf"
     },
-    {
-      "topic": "Automation",
-      "decks": [
-        {
-          "label": "Part 1",
-          "source": "slides/08_automation_part1.pdf"
-        },
-        {
-          "label": "Part 2",
-          "source": "slides/09_automation_part2.pdf"
-        }
-      ]
+    "human-capital-2": {
+      "title": "Human Capital: Part 2",
+      "kind": "slides",
+      "source": "slides/06_human_capital_part_2.pdf"
     },
-    {
-      "topic": "Labor Supply",
-      "decks": [
-        {
-          "label": "Part 1",
-          "source": "slides/10_labor_supply_part1.pdf"
-        },
-        {
-          "label": "Part 2",
-          "source": "slides/11_labor_supply_part2.pdf"
-        }
-      ]
+    "tasks": {
+      "title": "Tasks",
+      "kind": "slides",
+      "source": "slides/07_tasks.pdf"
     },
-    {
-      "topic": "Trade",
-      "decks": [
-        {
-          "label": "Part 1",
-          "source": "slides/12_trade_part1.pdf"
-        },
-        {
-          "label": "Part 2",
-          "source": "slides/13_trade_part2.pdf"
-        }
-      ]
-    }
-  ],
-  "reviews": [
-    {
+    "automation-1": {
+      "title": "Automation: Part 1",
+      "kind": "slides",
+      "source": "slides/08_automation_part1.pdf"
+    },
+    "automation-2": {
+      "title": "Automation: Part 2",
+      "kind": "slides",
+      "source": "slides/09_automation_part2.pdf"
+    },
+    "labor-supply-1": {
+      "title": "Labor Supply: Part 1",
+      "kind": "slides",
+      "source": "slides/10_labor_supply_part1.pdf"
+    },
+    "labor-supply-2": {
+      "title": "Labor Supply: Part 2",
+      "kind": "slides",
+      "source": "slides/11_labor_supply_part2.pdf"
+    },
+    "trade-1": {
+      "title": "Trade: Part 1",
+      "kind": "slides",
+      "source": "slides/12_trade_part1.pdf"
+    },
+    "trade-2": {
+      "title": "Trade: Part 2",
+      "kind": "slides",
+      "source": "slides/13_trade_part2.pdf"
+    },
+    "midterm-review": {
+      "kind": "review",
       "title": "Midterm Review",
       "source": "slides/Midterm_Review.pdf"
     },
-    {
+    "final-review": {
+      "kind": "review",
       "title": "Final Review",
       "source": "slides/Final_Review.pdf"
-    }
-  ],
-  "datasets": [
-    {
+    },
+    "cps-guide": {
+      "kind": "guide",
       "title": "CPS — Current Population Survey",
       "source": "slides/dataset_slides/data_01_cps.pdf"
     },
-    {
+    "acs-guide": {
+      "kind": "guide",
       "title": "ACS — American Community Survey",
       "source": "slides/dataset_slides/data_02_acs.pdf"
     },
-    {
+    "onet-guide": {
+      "kind": "guide",
       "title": "O*NET",
       "source": "slides/dataset_slides/data_03_onet.pdf"
-    }
-  ],
-  "psets": [
-    {
+    },
+    "pset1": {
+      "kind": "assignment",
       "title": "Problem Set 1",
       "source": "pset/pset1/pset1.pdf",
       "solutions": {
@@ -141,7 +110,8 @@
         "release": false
       }
     },
-    {
+    "pset2": {
+      "kind": "assignment",
       "title": "Problem Set 2",
       "source": "pset/pset2/pset2.pdf",
       "solutions": {
@@ -149,16 +119,135 @@
         "release": false
       }
     },
-    {
+    "pset3": {
+      "kind": "assignment",
       "title": "Problem Set 3",
       "source": "pset/pset3/pset3.pdf",
       "solutions": {
         "source": "pset/pset3/pset3_solutions.pdf",
         "release": false
       }
+    },
+    "cps-csv": {
+      "title": "CPS data (most programs)",
+      "kind": "data",
+      "source": "materials/cps/data/cps_aug_25.csv",
+      "destination": "downloads/data/cps/cps_aug_25.csv"
+    },
+    "cps-stata": {
+      "title": "CPS data (Stata)",
+      "kind": "data",
+      "source": "materials/cps/data/cps_aug_25.dta",
+      "destination": "downloads/data/cps/cps_aug_25.dta"
+    },
+    "cps-python": {
+      "title": "CPS analysis (Python)",
+      "kind": "code",
+      "source": "materials/cps/code/analyze.py",
+      "destination": "downloads/code/cps/analyze.py"
+    },
+    "cps-stata-code": {
+      "title": "CPS analysis (Stata)",
+      "kind": "code",
+      "source": "materials/cps/code/analyze.do",
+      "destination": "downloads/code/cps/analyze.do"
+    },
+    "cps-r": {
+      "title": "CPS analysis (R)",
+      "kind": "code",
+      "source": "materials/cps/code/analyze.R",
+      "destination": "downloads/code/cps/analyze.R"
+    },
+    "acs-excel": {
+      "title": "ACS healthcare data (Excel)",
+      "kind": "data",
+      "source": "materials/acs/data/acs_clean_healthcare.xlsx",
+      "destination": "downloads/data/acs/acs_clean_healthcare.xlsx"
+    },
+    "acs-stata": {
+      "title": "ACS healthcare data (Stata)",
+      "kind": "data",
+      "source": "materials/acs/data/acs_clean_healthcare.dta",
+      "destination": "downloads/data/acs/acs_clean_healthcare.dta"
+    },
+    "acs-csv": {
+      "title": "ACS healthcare data (most programs)",
+      "kind": "data",
+      "source": "materials/acs/data/acs_clean_healthcare.csv",
+      "destination": "downloads/data/acs/acs_clean_healthcare.csv"
+    },
+    "acs-stata-code": {
+      "title": "ACS healthcare analysis (Stata)",
+      "kind": "code",
+      "source": "materials/acs/code/acs_healthcare.do",
+      "destination": "downloads/code/acs/acs_healthcare.do"
+    },
+    "acs-python": {
+      "title": "ACS healthcare analysis (Python)",
+      "kind": "code",
+      "source": "materials/acs/code/acs_healthcare.py",
+      "destination": "downloads/code/acs/acs_healthcare.py"
+    },
+    "acs-r": {
+      "title": "ACS healthcare analysis (R)",
+      "kind": "code",
+      "source": "materials/acs/code/acs_healthcare.R",
+      "destination": "downloads/code/acs/acs_healthcare.R"
+    },
+    "onet-excel": {
+      "title": "O*NET work activities (Excel)",
+      "kind": "data",
+      "source": "materials/onet/data/work_activities.xlsx",
+      "destination": "downloads/data/onet/work_activities.xlsx"
+    },
+    "onet-stata": {
+      "title": "O*NET work activities (Stata)",
+      "kind": "data",
+      "source": "materials/onet/data/work_activities.dta",
+      "destination": "downloads/data/onet/work_activities.dta"
+    },
+    "onet-csv": {
+      "title": "O*NET work activities (most programs)",
+      "kind": "data",
+      "source": "materials/onet/data/work_activities.csv",
+      "destination": "downloads/data/onet/work_activities.csv"
     }
-  ],
+  },
   "syllabus": {
     "source": "syllabus/syllabusFA25.pdf"
+  },
+  "bundles": {
+    "cps": {
+      "title": "CPS",
+      "readme": "materials/cps/README.md",
+      "materials": [
+        "cps-csv",
+        "cps-stata",
+        "cps-python",
+        "cps-stata-code",
+        "cps-r"
+      ]
+    },
+    "acs": {
+      "title": "ACS",
+      "readme": "materials/acs/README.md",
+      "materials": [
+        "acs-excel",
+        "acs-stata",
+        "acs-csv",
+        "acs-stata-code",
+        "acs-python",
+        "acs-r"
+      ]
+    },
+    "onet": {
+      "title": "O*NET",
+      "readme": "materials/onet/README.md",
+      "materials": [
+        "onet-excel",
+        "onet-stata",
+        "onet-csv"
+      ]
+    }
   }
 }
