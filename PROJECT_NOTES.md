@@ -31,8 +31,10 @@ The course repository has now been created. SSH authentication returned
 `Permission denied (publickey)`, so origin uses HTTPS with the existing GitHub
 CLI login via a repository-local credential helper. HTTPS access is verified.
 The publishing command establishes the upstream and retries saved commits.
-GitHub Pages must be configured to deploy from main / root; deployment has not
-yet been verified. The textbook repository is separate.
+GitHub Pages is configured to deploy from main / root. The live deployment and
+sample lecture, problem-set, and syllabus downloads were verified. The textbook
+repository is separate. Both outbound textbook links open in a new tab and
+include accessible labels indicating that behavior.
 
 Tests cover incremental builds, missing/empty sources, publishing controls,
 solution release dates, local-link validation, and publish/retry behavior with a

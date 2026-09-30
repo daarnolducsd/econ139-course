@@ -333,7 +333,7 @@ def render(topics, reviews, datasets, psets, syllabus, course):
       <a href="#textbook">Textbook</a>
       <a href="#slides">Lecture Slides</a>
       <a href="#psets">Problem Sets</a>
-      <a href="{esc(TEXTBOOK_URL)}">Textbook Site &#8599;</a>
+      <a href="{esc(TEXTBOOK_URL)}" target="_blank" rel="noopener noreferrer" aria-label="Textbook site (opens in a new tab)">Textbook Site &#8599;</a>
       {(f'<a href="{esc(syllabus)}">Syllabus</a>') if syllabus else ""}
     </div>
   </nav>
@@ -342,7 +342,7 @@ def render(topics, reviews, datasets, psets, syllabus, course):
     <section id="textbook" class="card highlight">
       <h2>Textbook</h2>
       <p>The full course textbook is available online and updated continuously.</p>
-      <p><a class="button" href="{esc(TEXTBOOK_URL)}">Open the textbook &rarr;</a></p>
+      <p><a class="button" href="{esc(TEXTBOOK_URL)}" target="_blank" rel="noopener noreferrer" aria-label="Open the textbook (opens in a new tab)">Open the textbook &#8599;</a></p>
     </section>
 
     <section id="slides" class="card">
