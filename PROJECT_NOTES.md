@@ -1,77 +1,44 @@
-# ECON 139 Website — Project Notes (for resuming work)
+# ECON 139 Website — Project Notes
 
-> Tell Claude: **"read website/PROJECT_NOTES.md"** to pick up where we left off.
+## Current workflow
 
-## Goal
+- `website/` is a separate Git repository; branch `main`.
+- Origin: `git@github.com:daarnolducsd/econ139-course.git`.
+- Configured site URL: https://daarnolducsd.github.io/econ139-course/.
+- Textbook: https://daarnolducsd.github.io/econ139/index.html (separate Quarto repo).
+- `course.json` is the content and source-file mapping. Its initial entries
+  preserve the existing Fall 2025 term, topic grouping, titles, ordering, and
+  public URLs. All problem-set solutions remain private.
+- `build.py` reads only explicitly mapped, published PDFs from the parent course
+  folder, validates all inputs/local links before writing, and updates only
+  changed bytes. It removes PDFs no longer included in the published mapping.
+- `index.html` is generated. Styling remains in `assets/style.css`.
+- `./website/publish.sh` works from the ECON139 folder; `./publish.sh` works from
+  inside website. Both build, commit website files, and push to origin/main.
+- `--check` validates without writing; `--local` builds without Git operations;
+  `--preview` builds and serves at localhost:8000.
+- Publishing establishes the upstream on the first successful push and retries
+  an existing local commit after a failed push. Unrelated root files are not
+  automatically staged; unrelated pre-staged files block publishing.
 
-Replace the clunky Canvas workflow with a static course site on **GitHub
-Pages**. The instructor edits slides/psets in the usual Dropbox folders, runs
-one command (`./publish.sh`), and the live site refreshes. No re-uploading, no
-broken links.
+## Current validation and hosting status
 
-## Where things live
+At inspection on September 30, 2026, source PDFs became available after Dropbox
+finished downloading them. A local build updated the website syllabus from its
+source; a second check reported zero changes. All 23 public PDFs and local links
+validated, and the generated HTML and CSS remained unchanged.
+The local main branch had no upstream configured. An authenticated `gh repo
+view daarnolducsd/econ139-course` lookup could not resolve the configured
+repository. It must be created or the origin corrected before live publishing.
+GitHub Pages deployment has not been verified. No live publication was performed
+while implementing this workflow.
 
-- **Working folder:** `/Users/davidarnold/Dropbox/Teaching/ECON139/website/`
-  (its own git repo, a sibling of the `slides/`, `pset/`, `syllabus/` folders).
-- **Target GitHub repo:** `git@github.com:daarnolducsd/econ139-course.git`
-  (remote `origin` already added locally).
-- **Target live URL:** https://daarnolducsd.github.io/econ139-course
-- **Textbook (separate, already live):** https://daarnolducsd.github.io/econ139/index.html
-  — its source is the `../textbook/` Quarto repo (`econ139` repo, gh-pages branch).
+Tests cover incremental builds, missing/empty sources, publishing controls,
+solution release dates, local-link validation, and publish/retry behavior with a
+local bare Git remote. See README.md for commands and content-editing examples.
 
-## Key decisions
+## Future work
 
-- **Separate repo** for the site (not folded into the textbook repo) so nothing
-  sensitive can leak.
-- **Sensitive material stays in the parent Dropbox folder** (`../grades`,
-  `../midterm`, `../final`, `../pset/*/*_solutions.pdf`) and is NEVER copied
-  into this repo. `build.py` only copies specific public files.
-- **Materials published:** lecture slide PDFs, dataset-guide PDFs, pset question
-  PDFs, syllabus PDF. No `.pptx`.
-- **Pset solutions:** released by date via `SOLUTION_RELEASE` in `build.py`.
-
-## How it works
-
-- `build.py` scans `../slides`, `../pset`, `../syllabus`, copies the public PDFs
-  into `slides/`, `psets/`, `syllabus/`, and regenerates `index.html`.
-- `publish.sh` runs `build.py`, then `git add/commit/push`.
-- `index.html` is generated — do not hand-edit it; change `build.py` instead.
-- Lecture slides render as a **Topic | Slides table**, grouped via the `TOPICS`
-  list in `build.py` (e.g. Monopsony = Theory + Empirics on one row).
-- Styling in `assets/style.css`; current theme is **light blue** (CSS variables
-  at the top of the file). There is a sticky top **nav** bar.
-
-## Status (as of last session)
-
-- [x] Site built; `index.html`, slides, psets, syllabus all generated.
-- [x] Light-blue theme + sticky nav + grouped slides table.
-- [x] Dated pset-solution releases implemented and tested.
-- [x] Committed locally (`main` branch). Remote `origin` added.
-- [ ] **NOT pushed yet** — the GitHub repo `econ139-course` still needs to be
-      created, and GitHub Pages enabled.
-
-## To go live (remaining steps)
-
-1. Create an **empty** repo at https://github.com/new named `econ139-course`
-   (Public, no README).
-2. From this folder: `git push -u origin main`
-3. Repo **Settings → Pages → Deploy from a branch → `main` / `/ (root)` → Save**.
-4. Wait ~1 minute; visit https://daarnolducsd.github.io/econ139-course
-
-After that, the only recurring command is `./publish.sh`.
-
-## Common edits (all in build.py)
-
-- New lecture: drop the PDF in `../slides/`, run `./publish.sh`. Add it to
-  `TOPICS` (and optionally `SLIDE_TITLES`) for nice grouping/naming.
-- Release pset solutions on a date: set e.g. `SOLUTION_RELEASE = {"pset1":
-  "2026-02-15"}`. Run `./publish.sh` on/after that date.
-- Course title / term / textbook link: constants at the top of `build.py`.
-- Colors: CSS variables at the top of `assets/style.css`.
-
-## Ideas not yet done (possible future work)
-
-- A "Schedule" section / weekly calendar table.
-- Auto-running `publish.sh` on a daily local schedule so dated solution
-  releases publish themselves (discussed; not set up).
-- Lecture dates shown next to each topic.
+The current light-blue theme, sticky navigation, and grouped lecture table are
+preserved. The visual redesign and a possible weekly schedule remain separate
+future tasks. No scheduled builds or automatic slide compilation are configured.

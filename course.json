@@ -1,0 +1,164 @@
+{
+  "course": {
+    "title": "ECON 139: Labor Economics",
+    "term": "Fall 2025",
+    "instructor": "David Arnold",
+    "textbook_url": "https://daarnolducsd.github.io/econ139/index.html"
+  },
+  "lectures": [
+    {
+      "topic": "Introduction",
+      "decks": [
+        {
+          "label": "Slides",
+          "source": "slides/00_intro.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "Perfect Competition",
+      "decks": [
+        {
+          "label": "Slides",
+          "source": "slides/01_perfect_competition.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "Minimum Wage",
+      "decks": [
+        {
+          "label": "Slides",
+          "source": "slides/02_min_wage.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "Monopsony",
+      "decks": [
+        {
+          "label": "Theory",
+          "source": "slides/03_monopsony_theory.pdf"
+        },
+        {
+          "label": "Empirics",
+          "source": "slides/04_monopsony_empirics.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "Human Capital",
+      "decks": [
+        {
+          "label": "Part 1",
+          "source": "slides/05_human_capital.pdf"
+        },
+        {
+          "label": "Part 2",
+          "source": "slides/06_human_capital_part_2.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "Tasks",
+      "decks": [
+        {
+          "label": "Slides",
+          "source": "slides/07_tasks.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "Automation",
+      "decks": [
+        {
+          "label": "Part 1",
+          "source": "slides/08_automation_part1.pdf"
+        },
+        {
+          "label": "Part 2",
+          "source": "slides/09_automation_part2.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "Labor Supply",
+      "decks": [
+        {
+          "label": "Part 1",
+          "source": "slides/10_labor_supply_part1.pdf"
+        },
+        {
+          "label": "Part 2",
+          "source": "slides/11_labor_supply_part2.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "Trade",
+      "decks": [
+        {
+          "label": "Part 1",
+          "source": "slides/12_trade_part1.pdf"
+        },
+        {
+          "label": "Part 2",
+          "source": "slides/13_trade_part2.pdf"
+        }
+      ]
+    }
+  ],
+  "reviews": [
+    {
+      "title": "Midterm Review",
+      "source": "slides/Midterm_Review.pdf"
+    },
+    {
+      "title": "Final Review",
+      "source": "slides/Final_Review.pdf"
+    }
+  ],
+  "datasets": [
+    {
+      "title": "CPS — Current Population Survey",
+      "source": "slides/dataset_slides/data_01_cps.pdf"
+    },
+    {
+      "title": "ACS — American Community Survey",
+      "source": "slides/dataset_slides/data_02_acs.pdf"
+    },
+    {
+      "title": "O*NET",
+      "source": "slides/dataset_slides/data_03_onet.pdf"
+    }
+  ],
+  "psets": [
+    {
+      "title": "Problem Set 1",
+      "source": "pset/pset1/pset1.pdf",
+      "solutions": {
+        "source": "pset/pset1/pset1_solutions.pdf",
+        "release": false
+      }
+    },
+    {
+      "title": "Problem Set 2",
+      "source": "pset/pset2/pset2.pdf",
+      "solutions": {
+        "source": "pset/pset2/pset2_solutions.pdf",
+        "release": false
+      }
+    },
+    {
+      "title": "Problem Set 3",
+      "source": "pset/pset3/pset3.pdf",
+      "solutions": {
+        "source": "pset/pset3/pset3_solutions.pdf",
+        "release": false
+      }
+    }
+  ],
+  "syllabus": {
+    "source": "syllabus/syllabusFA25.pdf"
+  }
+}

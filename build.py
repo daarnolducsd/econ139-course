@@ -1,255 +1,265 @@
 #!/usr/bin/env python3
-"""
-Build script for the ECON 139 course website.
+"""Validate and incrementally build the course site from course.json.
 
-It scans the sibling Dropbox folders (../slides, ../pset, ../syllabus),
-copies the *public* PDFs into this repo, and regenerates index.html.
-
-Run it via ./publish.sh (which also commits + pushes), or directly:
-    python3 build.py
-
-To add a new lecture: drop the PDF in ../slides/ and re-run. To give it a
-nicer name on the site, add an entry to SLIDE_TITLES below.
+Source paths are relative to the parent ECON139 folder. Only explicitly listed,
+published PDFs are copied. This script does not compile PowerPoint/LaTeX or push.
 """
 
+import argparse
 import datetime
 import html
+from html.parser import HTMLParser
+import json
 import os
-import re
-import shutil
+from pathlib import Path
+import tempfile
+from urllib.parse import unquote, urlsplit
 
-# ---------------------------------------------------------------------------
-# CONFIG  -- edit these
-# ---------------------------------------------------------------------------
-
-COURSE_TITLE = "ECON 139: Labor Economics"
-TERM = "Fall 2025"
-INSTRUCTOR = "David Arnold"
-TEXTBOOK_URL = "https://daarnolducsd.github.io/econ139/index.html"
-
-# Problem set solutions: control when each set's solutions go public.
-# Map the pset folder name to a release date "YYYY-MM-DD". Solutions are
-# published only once that date has arrived (checked when build.py runs).
-#   - Use None (or "") to release immediately.
-#   - Omit a pset entirely to keep its solutions private indefinitely.
-# Before the date, the site shows a muted "solutions available <date>" note.
-#
-# NOTE: the site is static, so a dated release only takes effect the next time
-# you run ./publish.sh on or after that date. Run it that morning (or any time
-# after) and the solutions appear.
-SOLUTION_RELEASE = {
-    # "pset1": "2026-02-15",
-    # "pset2": "2026-03-01",
-    # "pset3": None,            # available now
-}
-
-# Optional nice display names for slide files (filename without .pdf).
-# Anything not listed here gets an auto-generated title.
-SLIDE_TITLES = {
-    "00_intro": "Introduction",
-    "01_perfect_competition": "Perfect Competition",
-    "02_min_wage": "Minimum Wage",
-    "03_monopsony_theory": "Monopsony: Theory",
-    "04_monopsony_empirics": "Monopsony: Empirics",
-    "05_human_capital": "Human Capital",
-    "06_human_capital_part_2": "Human Capital (Part 2)",
-    "07_tasks": "Tasks",
-    "08_automation_part1": "Automation (Part 1)",
-    "09_automation_part2": "Automation (Part 2)",
-    "10_labor_supply_part1": "Labor Supply (Part 1)",
-    "11_labor_supply_part2": "Labor Supply (Part 2)",
-    "12_trade_part1": "Trade (Part 1)",
-    "13_trade_part2": "Trade (Part 2)",
-    "Midterm_Review": "Midterm Review",
-    "Final_Review": "Final Review",
-    "data_01_cps": "CPS — Current Population Survey",
-    "data_02_acs": "ACS — American Community Survey",
-    "data_03_onet": "O*NET",
-}
-
-# Lecture topics, in display order. Each topic groups one or more slide decks
-# shown together on one table row. Each deck is (filename_stem, short_label).
-# Any lecture PDF in ../slides that is NOT listed here still appears, as its
-# own topic row, using its auto-generated title.
-TOPICS = [
-    ("Introduction", [("00_intro", "Slides")]),
-    ("Perfect Competition", [("01_perfect_competition", "Slides")]),
-    ("Minimum Wage", [("02_min_wage", "Slides")]),
-    ("Monopsony", [("03_monopsony_theory", "Theory"),
-                   ("04_monopsony_empirics", "Empirics")]),
-    ("Human Capital", [("05_human_capital", "Part 1"),
-                       ("06_human_capital_part_2", "Part 2")]),
-    ("Tasks", [("07_tasks", "Slides")]),
-    ("Automation", [("08_automation_part1", "Part 1"),
-                    ("09_automation_part2", "Part 2")]),
-    ("Labor Supply", [("10_labor_supply_part1", "Part 1"),
-                      ("11_labor_supply_part2", "Part 2")]),
-    ("Trade", [("12_trade_part1", "Part 1"),
-               ("13_trade_part2", "Part 2")]),
-]
-
-# ---------------------------------------------------------------------------
-# Paths
-# ---------------------------------------------------------------------------
-
-SITE = os.path.dirname(os.path.abspath(__file__))      # website/
-ROOT = os.path.dirname(SITE)                            # ECON139/
-
-SRC_SLIDES = os.path.join(ROOT, "slides")
-SRC_DATASET = os.path.join(ROOT, "slides", "dataset_slides")
-SRC_PSETS = os.path.join(ROOT, "pset")
-SRC_SYLLABUS = os.path.join(ROOT, "syllabus", "syllabusFA25.pdf")
-
-OUT_SLIDES = os.path.join(SITE, "slides")
-OUT_DATASET = os.path.join(SITE, "slides", "dataset")
-OUT_PSETS = os.path.join(SITE, "psets")
-OUT_SYLLABUS = os.path.join(SITE, "syllabus")
+SITE = Path(__file__).resolve().parent
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-def reset_dir(path):
-    if os.path.isdir(path):
-        shutil.rmtree(path)
-    os.makedirs(path)
+class BuildError(ValueError):
+    """An actionable content/configuration error, detected before writing."""
 
 
-def pretty_title(stem):
-    """Turn a filename stem into a human title if not in SLIDE_TITLES."""
-    if stem in SLIDE_TITLES:
-        return SLIDE_TITLES[stem]
-    parts = stem.split("_")
-    if parts and re.fullmatch(r"\d+", parts[0]):
-        parts = parts[1:]
-    words = " ".join(parts).replace("part ", "Part ").strip()
-    return words.title() if words else stem
+def esc(value):
+    return html.escape(value, quote=True)
 
 
-def lecture_number(stem):
-    m = re.match(r"(\d+)", stem)
-    return int(m.group(1)) if m else None
+def fmt_date(value):
+    return f"{value.strftime('%B')} {value.day}, {value.year}"
 
 
-def copy_pdfs(src_dir, out_dir):
-    """Copy every *.pdf in src_dir (non-recursive) to out_dir. Returns stems."""
-    stems = []
-    if not os.path.isdir(src_dir):
-        return stems
-    for name in sorted(os.listdir(src_dir)):
-        if name.lower().endswith(".pdf"):
-            shutil.copy2(os.path.join(src_dir, name), os.path.join(out_dir, name))
-            stems.append(name[:-4])
-    return stems
+def record(value, context, required=(), optional=()):
+    if not isinstance(value, dict):
+        raise BuildError(f"{context}: expected an object")
+    missing = set(required) - value.keys()
+    unknown = value.keys() - set(required) - set(optional)
+    if missing or unknown:
+        raise BuildError(f"{context}: missing fields {sorted(missing)}; "
+                         f"unknown fields {sorted(unknown)}")
+    return value
 
 
-def esc(s):
-    return html.escape(s, quote=True)
+def text_field(entry, key):
+    value = entry[key]
+    if not isinstance(value, str) or not value.strip():
+        raise BuildError(f"{key}: expected a nonempty string")
+    return value
 
 
-# ---------------------------------------------------------------------------
-# Collect content
-# ---------------------------------------------------------------------------
-
-def collect_slides():
-    reset_dir(OUT_SLIDES)
-    os.makedirs(OUT_DATASET, exist_ok=True)
-
-    stems = copy_pdfs(SRC_SLIDES, OUT_SLIDES)
-    present = set(stems)
-
-    # Group lecture decks into topics, keeping only decks that exist.
-    topics, used = [], set()
-    for topic, decks in TOPICS:
-        items = []
-        for stem, label in decks:
-            if stem in present:
-                items.append({"label": label, "href": f"slides/{stem}.pdf"})
-                used.add(stem)
-        if items:
-            topics.append({"topic": topic, "items": items})
-
-    # Numbered lecture decks not covered by TOPICS -> their own topic rows.
-    leftover = [s for s in stems
-                if s not in used and lecture_number(s) is not None]
-    leftover.sort(key=lambda s: lecture_number(s))
-    for s in leftover:
-        topics.append({"topic": pretty_title(s),
-                       "items": [{"label": "Slides", "href": f"slides/{s}.pdf"}]})
-
-    # Everything else with no lecture number = exam reviews etc.
-    reviews = [{"title": pretty_title(s), "href": f"slides/{s}.pdf"}
-               for s in stems
-               if s not in used and lecture_number(s) is None]
-    reviews.sort(key=lambda x: ("final" in x["href"].lower(), x["href"].lower()))
-
-    dataset_stems = copy_pdfs(SRC_DATASET, OUT_DATASET)
-    datasets = [
-        {"title": pretty_title(s), "href": f"slides/dataset/{s}.pdf"}
-        for s in dataset_stems
-    ]
-    return topics, reviews, datasets
+def published(entry):
+    value = entry.get("published", True)
+    if not isinstance(value, bool):
+        raise BuildError("published must be true or false")
+    return value
 
 
-def fmt_date(d):
-    return f"{d.strftime('%B')} {d.day}, {d.year}"
-
-
-def solution_status(name):
-    """Return ('released', None) / ('pending', date) / ('private', None)."""
-    if name not in SOLUTION_RELEASE:
+def solution_status(release, today):
+    if release is False or release is None:
         return "private", None
-    when = SOLUTION_RELEASE[name]
-    if not when:
+    if release is True:
         return "released", None
-    due = datetime.date.fromisoformat(when)
-    if datetime.date.today() >= due:
-        return "released", None
-    return "pending", due
+    if not isinstance(release, str):
+        raise BuildError("solutions.release must be false, true, or YYYY-MM-DD")
+    try:
+        due = datetime.date.fromisoformat(release)
+    except ValueError as error:
+        raise BuildError(f"Invalid solution release date: {release!r}") from error
+    if release != due.isoformat():
+        raise BuildError("Solution release dates must use YYYY-MM-DD")
+    return ("released", None) if today >= due else ("pending", due)
 
 
-def collect_psets():
-    reset_dir(OUT_PSETS)
-    psets = []
-    if not os.path.isdir(SRC_PSETS):
-        return psets
-    for name in sorted(os.listdir(SRC_PSETS)):
-        folder = os.path.join(SRC_PSETS, name)
-        q = os.path.join(folder, f"{name}.pdf")
-        if not (os.path.isdir(folder) and os.path.isfile(q)):
+def load_config(path):
+    try:
+        config = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        raise BuildError(f"Cannot read {path}: {error}") from error
+    record(config, "course.json", required=(
+        "course", "lectures", "reviews", "datasets", "psets", "syllabus"))
+    course = record(config["course"], "course", required=(
+        "title", "term", "instructor", "textbook_url"))
+    for key in course:
+        text_field(course, key)
+    url = urlsplit(course["textbook_url"])
+    if url.scheme not in ("http", "https") or not url.netloc:
+        raise BuildError("course.textbook_url must be an HTTP(S) URL")
+    for key in ("lectures", "reviews", "datasets", "psets"):
+        if not isinstance(config[key], list):
+            raise BuildError(f"{key}: expected a list")
+    return config
+
+
+def collect_content(config, source_root, today=None):
+    """Read and validate ALL published inputs before changing any output."""
+    source_root = Path(source_root).resolve()
+    today = today or datetime.date.today()
+    files = {}
+
+    def pdf(entry, folder, filename=None):
+        source = Path(text_field(entry, "source"))
+        if source.is_absolute() or ".." in source.parts:
+            raise BuildError(f"Source must be relative to ECON139: {source}")
+        path = (source_root / source).resolve()
+        if not path.is_relative_to(source_root) or path.suffix.lower() != ".pdf":
+            raise BuildError(f"Source must be a PDF inside ECON139: {source}")
+        href = f"{folder}/{filename or source.name}"
+        if href in files:
+            raise BuildError(f"Duplicate published path: {href}")
+        try:
+            data = path.read_bytes()
+        except OSError as error:
+            raise BuildError(f"Cannot read source {path}: {error}") from error
+        if not data.startswith(b"%PDF-"):
+            raise BuildError(f"Source is empty or not a PDF: {path}. "
+                             "Export it as PDF or download it from Dropbox first.")
+        files[href] = data
+        return href
+
+    topics = []
+    for entry in config["lectures"]:
+        record(entry, "lecture", required=("topic", "decks"), optional=("published",))
+        title = text_field(entry, "topic")
+        if not isinstance(entry["decks"], list):
+            raise BuildError(f"{title}: decks must be a list")
+        if not published(entry):
             continue
-        shutil.copy2(q, os.path.join(OUT_PSETS, f"{name}.pdf"))
-        m = re.search(r"(\d+)", name)
-        entry = {
-            "title": f"Problem Set {m.group(1)}" if m else name,
-            "href": f"psets/{name}.pdf",
-            "sol_href": None,
-            "sol_pending": None,
-        }
-        sol = os.path.join(folder, f"{name}_solutions.pdf")
-        status, due = solution_status(name)
-        if status == "released" and os.path.isfile(sol):
-            shutil.copy2(sol, os.path.join(OUT_PSETS, f"{name}_solutions.pdf"))
-            entry["sol_href"] = f"psets/{name}_solutions.pdf"
-        elif status == "pending":
-            entry["sol_pending"] = fmt_date(due)
-        entry["status"] = status
-        psets.append(entry)
-    return psets
+        items = []
+        for deck in entry["decks"]:
+            record(deck, title, required=("label", "source"), optional=("published",))
+            label = text_field(deck, "label")
+            if published(deck):
+                items.append({"label": label, "href": pdf(deck, "slides")})
+        if items:
+            topics.append({"topic": title, "items": items})
+
+    def materials(section, folder):
+        result = []
+        for entry in config[section]:
+            record(entry, section, required=("title", "source"), optional=("published",))
+            title = text_field(entry, "title")
+            if published(entry):
+                result.append({"title": title, "href": pdf(entry, folder)})
+        return result
+
+    reviews = materials("reviews", "slides")
+    datasets = materials("datasets", "slides/dataset")
+    psets = []
+    for entry in config["psets"]:
+        record(entry, "problem set", required=("title", "source"),
+               optional=("published", "solutions"))
+        title = text_field(entry, "title")
+        if not published(entry):
+            continue
+        item = {"title": title, "href": pdf(entry, "psets"),
+                "sol_href": None, "sol_pending": None}
+        if "solutions" in entry:
+            sol = record(entry["solutions"], title + " solutions",
+                         required=("source", "release"))
+            status, due = solution_status(sol["release"], today)
+            if status == "released":
+                item["sol_href"] = pdf(sol, "psets")
+            elif status == "pending":
+                item["sol_pending"] = fmt_date(due)
+        psets.append(item)
+
+    syllabus = record(config["syllabus"], "syllabus", required=("source",),
+                      optional=("published",))
+    syllabus_href = pdf(syllabus, "syllabus", "syllabus.pdf") if published(syllabus) else None
+    page = render(topics, reviews, datasets, psets, syllabus_href, config["course"])
+    return page, files
 
 
-def collect_syllabus():
-    reset_dir(OUT_SYLLABUS)
-    if os.path.isfile(SRC_SYLLABUS):
-        shutil.copy2(SRC_SYLLABUS, os.path.join(OUT_SYLLABUS, "syllabus.pdf"))
-        return "syllabus/syllabus.pdf"
-    return None
+class Links(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.hrefs = []
+        self.ids = set()
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if "id" in attrs:
+            self.ids.add(attrs["id"])
+        for key in ("href", "src"):
+            if key in attrs:
+                self.hrefs.append(attrs[key])
 
 
-# ---------------------------------------------------------------------------
-# Render HTML
-# ---------------------------------------------------------------------------
+def validate_links(page, files, site):
+    links = Links()
+    links.feed(page)
+    for href in links.hrefs:
+        url = urlsplit(href)
+        if url.scheme or url.netloc:
+            continue
+        if not url.path:
+            if url.fragment and unquote(url.fragment) not in links.ids:
+                raise BuildError(f"Missing section: {href}")
+            continue
+        relative = unquote(url.path)
+        path = (site / relative).resolve()
+        if not path.is_relative_to(site.resolve()):
+            raise BuildError(f"Local link leaves the website: {href}")
+        if relative not in files and (not path.is_file() or path.stat().st_size == 0):
+            raise BuildError(f"Missing or empty local link target: {href}")
+
+
+def plan_changes(site, outputs):
+    changed, unchanged = [], []
+    for relative, data in outputs.items():
+        target = site / relative
+        if not target.resolve().is_relative_to(site.resolve()):
+            raise BuildError(f"Output leaves the website: {relative}")
+        if target.is_file() and target.read_bytes() == data:
+            unchanged.append(relative)
+        else:
+            changed.append(relative)
+    removed = []
+    for folder in ("slides", "psets", "syllabus"):
+        for path in (site / folder).rglob("*"):
+            relative = path.relative_to(site).as_posix()
+            if path.is_file() and path.suffix.lower() == ".pdf" and relative not in outputs:
+                removed.append(relative)
+    return changed, unchanged, sorted(removed)
+
+
+def write_atomic(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(dir=path.parent, prefix=".build-", delete=False) as temp:
+        temporary = Path(temp.name)
+        try:
+            temp.write(data)
+            temp.close()
+            temporary.chmod(0o644)
+            os.replace(temporary, path)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+
+def build(site=SITE, source_root=None, config_path=None, check=False):
+    site = Path(site)
+    config = load_config(Path(config_path) if config_path else site / "course.json")
+    page, files = collect_content(config, source_root or site.parent)
+    validate_links(page, files, site)
+    outputs = {**files, ".nojekyll": b"", "index.html": page.encode("utf-8")}
+    changed, unchanged, removed = plan_changes(site, outputs)
+    if not check:
+        for relative in changed:
+            write_atomic(site / relative, outputs[relative])
+        for relative in removed:
+            (site / relative).unlink()
+    action = "Would update" if check else "Updated"
+    for relative in changed:
+        print(f"  {action}: {relative}")
+    for relative in removed:
+        print(f"  {'Would remove' if check else 'Removed'}: {relative}")
+    print(f"Validated {len(files)} PDFs and all local links. "
+          f"{len(changed)} changed, {len(removed)} removed, {len(unchanged)} unchanged.")
+    if not changed and not removed:
+        print("Website files are already up to date.")
+    return changed, removed
+
 
 def li_link(title, href, extra=""):
     return (
@@ -257,7 +267,11 @@ def li_link(title, href, extra=""):
     )
 
 
-def render(topics, reviews, datasets, psets, syllabus):
+def render(topics, reviews, datasets, psets, syllabus, course):
+    COURSE_TITLE = course["title"]
+    TERM = course["term"]
+    INSTRUCTOR = course["instructor"]
+    TEXTBOOK_URL = course["textbook_url"]
     rows = []
     for t in topics:
         links = '<span class="sep">/</span>'.join(
@@ -362,27 +376,14 @@ def render(topics, reviews, datasets, psets, syllabus):
 
 
 def main():
-    topics, reviews, datasets = collect_slides()
-    psets = collect_psets()
-    syllabus = collect_syllabus()
-    page = render(topics, reviews, datasets, psets, syllabus)
-    with open(os.path.join(SITE, "index.html"), "w") as f:
-        f.write(page)
-    # .nojekyll keeps GitHub Pages from ignoring files; harmless if present.
-    open(os.path.join(SITE, ".nojekyll"), "w").close()
-
-    n_decks = sum(len(t["items"]) for t in topics)
-    print(f"Built index.html")
-    print(f"  topics   : {len(topics)} ({n_decks} lecture decks)")
-    print(f"  reviews  : {len(reviews)}")
-    print(f"  datasets : {len(datasets)}")
-    released = [p["title"] for p in psets if p["sol_href"]]
-    pending = [f'{p["title"]} -> {p["sol_pending"]}'
-               for p in psets if p["sol_pending"]]
-    print(f"  psets    : {len(psets)}")
-    print(f"    released  : {released or 'none'}")
-    print(f"    pending   : {pending or 'none'}")
-    print(f"  syllabus : {'yes' if syllabus else 'missing'}")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true",
+                        help="validate and report changes without writing files")
+    args = parser.parse_args()
+    try:
+        build(check=args.check)
+    except (BuildError, OSError) as error:
+        parser.exit(1, f"Build stopped: {error}\nNo commit or push was attempted.\n")
 
 
 if __name__ == "__main__":
