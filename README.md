@@ -4,7 +4,7 @@ A static course site published with GitHub Pages. Requires Python 3.9+ and Git;
 no Python packages or JavaScript build tools are needed.
 
 Configured site URL: https://daarnolducsd.github.io/econ139-course/
-Remote: `git@github.com:daarnolducsd/econ139-course.git`
+Remote: `https://github.com/daarnolducsd/econ139-course.git`
 
 ## Update slides and publish
 
@@ -111,9 +111,9 @@ published files may remain accessible in Git history or caches.
 
 The site is its own Git repository inside `ECON139/website/`. The configured
 GitHub repository must exist, and your Git credentials must permit pushes.
-At the September 30, 2026 check, GitHub could not resolve the configured
-`daarnolducsd/econ139-course` repository for the authenticated account. Create
-that repository or correct `origin` before attempting a live publication.
+The repository is now created. HTTPS authentication uses the existing GitHub
+CLI login through a repository-local Git credential helper. If that login expires,
+run `gh auth login --hostname github.com --git-protocol https` and retry publishing.
 The publishing command establishes `origin/main` as the upstream on its first
 successful push; it expects the local branch to be `main`.
 

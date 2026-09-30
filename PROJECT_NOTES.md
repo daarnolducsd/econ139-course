@@ -3,7 +3,7 @@
 ## Current workflow
 
 - `website/` is a separate Git repository; branch `main`.
-- Origin: `git@github.com:daarnolducsd/econ139-course.git`.
+- Origin: `https://github.com/daarnolducsd/econ139-course.git`.
 - Configured site URL: https://daarnolducsd.github.io/econ139-course/.
 - Textbook: https://daarnolducsd.github.io/econ139/index.html (separate Quarto repo).
 - `course.json` is the content and source-file mapping. Its initial entries
@@ -27,11 +27,12 @@ At inspection on September 30, 2026, source PDFs became available after Dropbox
 finished downloading them. A local build updated the website syllabus from its
 source; a second check reported zero changes. All 23 public PDFs and local links
 validated, and the generated HTML and CSS remained unchanged.
-The local main branch had no upstream configured. An authenticated `gh repo
-view daarnolducsd/econ139-course` lookup could not resolve the configured
-repository. It must be created or the origin corrected before live publishing.
-GitHub Pages deployment has not been verified. No live publication was performed
-while implementing this workflow.
+The course repository has now been created. SSH authentication returned
+`Permission denied (publickey)`, so origin uses HTTPS with the existing GitHub
+CLI login via a repository-local credential helper. HTTPS access is verified.
+The publishing command establishes the upstream and retries saved commits.
+GitHub Pages must be configured to deploy from main / root; deployment has not
+yet been verified. The textbook repository is separate.
 
 Tests cover incremental builds, missing/empty sources, publishing controls,
 solution release dates, local-link validation, and publish/retry behavior with a
