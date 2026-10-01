@@ -34,7 +34,8 @@
       "resources": [
         "cps-csv",
         "cps-stata"
-      ]
+      ],
+      "locked": false
     },
     {
       "number": 2,
@@ -62,7 +63,8 @@
         "cps-python",
         "cps-stata-code",
         "cps-r"
-      ]
+      ],
+      "locked": true
     },
     {
       "number": 3,
@@ -96,7 +98,8 @@
           "note": "Due this week"
         }
       ],
-      "resources": []
+      "resources": [],
+      "locked": true
     },
     {
       "number": 4,
@@ -127,7 +130,8 @@
         "acs-stata-code",
         "acs-python",
         "acs-r"
-      ]
+      ],
+      "locked": true
     },
     {
       "number": 5,
@@ -141,7 +145,8 @@
           "title": "Midterm Practice"
         }
       ],
-      "resources": []
+      "resources": [],
+      "locked": true
     },
     {
       "number": 6,
@@ -156,7 +161,7 @@
           "url": "https://daarnolducsd.github.io/econ139/07.html"
         },
         {
-          "title": "Acemoglu and Autor (2011), pp. 1044\u20131055",
+          "title": "Acemoglu and Autor (2011), pp. 1044–1055",
           "url": "https://shapingwork.mit.edu/wp-content/uploads/2023/10/Acemoglu-Autor-Jan-2011.pdf"
         }
       ],
@@ -172,7 +177,8 @@
         "onet-excel",
         "onet-stata",
         "onet-csv"
-      ]
+      ],
+      "locked": true
     },
     {
       "number": 7,
@@ -193,7 +199,8 @@
           "note": "Assigned"
         }
       ],
-      "resources": []
+      "resources": [],
+      "locked": true
     },
     {
       "number": 8,
@@ -222,7 +229,8 @@
           "note": "Submit first draft"
         }
       ],
-      "resources": []
+      "resources": [],
+      "locked": true
     },
     {
       "number": 9,
@@ -242,7 +250,8 @@
           "note": "Peer feedback"
         }
       ],
-      "resources": []
+      "resources": [],
+      "locked": true
     },
     {
       "number": 10,
@@ -268,7 +277,8 @@
           "note": "Due this week"
         }
       ],
-      "resources": []
+      "resources": [],
+      "locked": true
     }
   ]
 }

@@ -181,3 +181,34 @@ headless Chrome session verified the grid at 1280px, stacked panels at 375px and
 highlight through the Problem sets navigation. Native anchors and the ACS
 download links also work with JavaScript disabled. Desktop and mobile screenshots
 were inspected; the local browser-check artifacts are outside the website repo.
+
+## Weekly and assignment locks
+
+Week 1 remains open; Weeks 2–10 show compact topic cards with a lock badge and
+availability message. All three problem sets are independently locked and retain
+their titles without download links. Week flags live in schedule.json; assignment
+flags live in course.json and default to locked when omitted. Changing an open
+week does not change an assignment's release state; locked assignments withhold
+solutions even if their solution release date has passed.
+
+The builder reads only currently available sources and removes withheld files
+from managed output. It excludes future-week content from Additional materials
+and topic ZIPs, and withholds unassigned materials while any week is locked.
+Shared materials stay available through their open weeks. The Week 1 CPS ZIP
+contains only its two data formats and the existing topic README; analysis code
+returns when Week 2 is unlocked. The source map preserves all mapped original
+paths with availability labels, including entries whose intended public paths
+are currently withheld.
+
+This changes the current generated output, not prior public Git history or
+downloaded copies. No history rewrite is performed. David approved this lock
+configuration and its release-warning guidance for publication.
+
+Validation: 35 isolated workflow tests pass, including shared slides, independent
+assignment locks, default-locked new assignments, solution withholding, partial
+ZIP membership, relocking cleanup, invalid flags, and read-only checks. The exact
+current public set contains eight approved files; 35 previous generated copies
+were removed, with originals untouched. Browser checks at 1280px, 375px, and
+320px verified nine locked cards, three locked assignment rows, all ten navigation
+targets, no horizontal overflow, and no locked-content links with JavaScript
+disabled. Desktop and mobile screenshots were inspected.

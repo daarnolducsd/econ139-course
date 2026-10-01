@@ -108,7 +108,8 @@
       "solutions": {
         "source": "pset/pset1/pset1_solutions.pdf",
         "release": false
-      }
+      },
+      "locked": true
     },
     "pset2": {
       "kind": "assignment",
@@ -117,7 +118,8 @@
       "solutions": {
         "source": "pset/pset2/pset2_solutions.pdf",
         "release": false
-      }
+      },
+      "locked": true
     },
     "pset3": {
       "kind": "assignment",
@@ -126,7 +128,8 @@
       "solutions": {
         "source": "pset/pset3/pset3_solutions.pdf",
         "release": false
-      }
+      },
+      "locked": true
     },
     "cps-csv": {
       "title": "CPS data (most programs)",

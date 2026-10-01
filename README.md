@@ -76,7 +76,7 @@ lists. Then run the usual `./website/publish.sh`. No PDF renaming, copying, or
 HTML editing is necessary.
 
 Each week requires `number`, `title`, and `materials`. `readings`, `assignments`,
-`resources`, and `dates` are optional. Keep exactly one entry for each number
+`resources`, `dates`, and `locked` are optional. Keep exactly one entry for each number
 1–10; empty weeks are allowed. Unknown IDs and duplicate IDs within one week
 stop the build before it writes output. Example optional dates: `"dates": "Sep 28–Oct 2"`.
 
@@ -93,6 +93,40 @@ the term remains internal metadata in `course.json`.
 The palette uses a soft stone page background, lighter off-white week cards,
 and slate, sand, mauve, and eucalyptus section headers. To adjust these colors,
 edit the variables and panel styles in `assets/style.css`.
+
+### Lock and release content
+
+Week 1 is currently open; Weeks 2–10 and all problem sets are locked.
+Locked weeks show their week number, topic, a lock badge, and an availability
+message. Their slides, readings, assignments, and data/code panels are omitted.
+Problem sets retain a locked title in the main Problem sets section and in any
+open week that references them, with no PDF or solutions link.
+
+To open a week, change its `"locked": true` to `"locked": false` in
+`schedule.json`, then run the usual `./website/publish.sh`. This does **not**
+unlock its problem sets. To release an assignment, independently set
+`"locked": false` on its entry in `course.json`. Problem sets default to locked
+if this field is omitted; week locks default to false for older schedules.
+Keep solution releases separate and private until intentionally released.
+
+The builder withholds locked PDFs, code, and data from the generated site, removes
+their previous managed copies, and includes only available members in topic ZIPs.
+Week 1's CPS ZIP currently contains its data and README, with no Week 2 analysis
+code. Instructions describe the full topic; code becomes available when its week
+opens. A file reused by an open week remains available there. When any week is
+locked, unassigned non-assignment materials are also withheld; put them in an
+open week to release them. Syllabus and textbook links remain available.
+
+Use `--sources` to see original paths and availability, and `--check` to inspect
+pending releases/removals without writes. `--local` builds without committing or
+publishing. Lock settings must be real JSON booleans, not strings or dates.
+The settings persist when content is moved between weeks.
+
+These controls govern the current site and future publication. PDFs already
+published may remain accessible through public Git history, caches, or downloaded
+copies; locking them does not restore confidentiality. Agent instructions require
+a warning before committing/publishing new or revised problem sets. This is agent
+guidance, not an automatic command-line release prompt.
 
 ### Start a new quarter
 
@@ -176,6 +210,8 @@ logs, caches, raw data, private solutions, and other unlisted files are never
 included through directory scanning. Hiding a member removes it from its
 individual download and ZIP on the next build. Hiding all members removes the
 ZIP and its instructions download. Update the README if changing a topic's files.
+Week locks also filter ZIP membership, so a bundle cannot expose later-week code
+or data through an open week's download.
 
 ### Add data or code
 
@@ -253,12 +289,14 @@ Each assignment can include a `solutions` object:
 
 - `false`: private; no solution file is copied or linked. This is the current
   setting for every assignment. Omitting `solutions` also keeps solutions private.
-- `true`: publish on the next run.
+- `true`: publish on the next run once the assignment is unlocked.
 - `"2026-10-15"`: publish on the next run on or after that date, using the
   computer's local date. Before then, show an availability note.
 
 This is a static site: a scheduled date does not itself trigger a build.
-Run the publish command on/after the date. Set `release` back to `false` and
+Run the publish command on/after the date with the assignment unlocked. An
+assignment lock withholds both its PDF and solutions regardless of the solution
+date setting. Set `release` back to `false` and
 publish to remove the solution file and link from the current site. Previously
 published files may remain accessible in Git history or caches.
 

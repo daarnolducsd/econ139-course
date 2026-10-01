@@ -34,7 +34,7 @@ class CourseFixture(unittest.TestCase):
                        "instructor": "Test Instructor", "textbook_url": "https://example.org/"},
             "materials": {
                 "intro": {"title": "Intro", "kind": "slides", "source": "slides/00_intro.pdf"},
-                "pset1": {"title": "Problem Set 1", "kind": "assignment", "source": "pset/pset1/pset1.pdf",
+                "pset1": {"title": "Problem Set 1", "kind": "assignment", "locked": False, "source": "pset/pset1/pset1.pdf",
                           "solutions": {"source": "pset/pset1/pset1_solutions.pdf", "release": False}},
             },
             "syllabus": {"source": "syllabus/current.pdf"},
@@ -95,6 +95,126 @@ class CourseFixture(unittest.TestCase):
 
 
 class BuildTests(CourseFixture):
+    def test_locked_week_withholds_files_and_shared_slide_stays_available(self):
+        (self.root / "slides/future.pdf").write_bytes(PDF)
+        self.config["materials"]["future"] = {"title": "Future slide", "kind": "slides", "source": "slides/future.pdf"}
+        self.schedule["weeks"][1]["materials"] = ["intro", "future"]
+        self.schedule["weeks"][1]["readings"] = [{"title": "Future reading", "url": "https://example.org/future"}]
+        self.save_config()
+        self.build()
+        self.schedule["weeks"][1]["locked"] = True
+        self.save_config()
+        before = self.snapshot()
+        changed, removed = self.build(check=True)
+        self.assertEqual(before, self.snapshot())
+        self.assertIn("slides/future.pdf", removed)
+        _, removed = self.build()
+        self.assertIn("slides/future.pdf", removed)
+        page = (self.site / "index.html").read_text()
+        week2 = page.split('<section id="week-2"')[1].split('</section>')[0]
+        self.assertIn("Topic 2", week2)
+        self.assertIn("Locked", week2)
+        self.assertNotIn("<a ", week2)
+        self.assertNotIn("Future reading", page)
+        self.assertNotIn("slides/future.pdf", page)
+        self.assertTrue((self.site / "slides/00_intro.pdf").exists())
+        self.schedule["weeks"][0]["locked"] = True
+        self.save_config()
+        self.build()
+        self.assertFalse((self.site / "slides/00_intro.pdf").exists())
+        self.assertNotIn("Additional materials", (self.site / "index.html").read_text())
+        self.assertTrue((self.root / "slides/future.pdf").exists())
+        self.config["materials"]["unassigned"] = {"title": "Unassigned future slide", "kind": "slides", "source": "slides/unassigned.pdf"}
+        self.save_config()
+        self.build()
+        self.assertFalse((self.site / "slides/unassigned.pdf").exists())
+
+    def test_assignment_locks_are_independent_default_closed_and_gate_solutions(self):
+        assignment = self.config["materials"]["pset1"]
+        assignment.pop("locked")
+        assignment["solutions"]["release"] = True
+        # Withheld originals need not be readable or present to build the page.
+        pdf = self.root / "pset/pset1/pset1.pdf"
+        solution = self.root / "pset/pset1/pset1_solutions.pdf"
+        pdf.unlink()
+        solution.unlink()
+        self.save_config()
+        self.build()
+        page = (self.site / "index.html").read_text()
+        self.assertEqual(page.count("Problem Set 1"), 2)
+        self.assertNotIn("psets/pset1", page)
+        self.assertFalse((self.site / "psets/pset1.pdf").exists())
+        pdf.write_bytes(PDF)
+        solution.write_bytes(PDF)
+        assignment["locked"] = False
+        self.save_config()
+        self.build()
+        self.assertTrue((self.site / "psets/pset1.pdf").exists())
+        self.assertTrue((self.site / "psets/pset1_solutions.pdf").exists())
+        # Closing a week does not silently relock a separately released assignment.
+        self.schedule["weeks"][0]["locked"] = True
+        self.save_config()
+        self.build()
+        self.assertTrue((self.site / "psets/pset1.pdf").exists())
+        assignment["locked"] = True
+        self.save_config()
+        _, removed = self.build()
+        self.assertIn("psets/pset1.pdf", removed)
+        self.assertIn("psets/pset1_solutions.pdf", removed)
+        self.schedule["weeks"][0]["locked"] = False
+        self.save_config()
+        self.build()
+        self.assertFalse((self.site / "psets/pset1.pdf").exists())
+
+    def test_locked_week_code_is_excluded_from_partial_zip_and_restores_on_unlock(self):
+        self.add_topic_bundle()
+        self.schedule["weeks"][0]["resources"] = ["sample-data"]
+        self.schedule["weeks"][1]["resources"] = ["sample-code"]
+        self.config["materials"]["pset1"]["locked"] = True
+        self.save_config()
+        self.build()
+        code = self.root / "materials/cps/code/analyze.py"
+        code.unlink()
+        self.schedule["weeks"][1]["locked"] = True
+        self.save_config()
+        self.build()
+        self.assertFalse((self.site / "downloads/code/cps/analyze.py").exists())
+        with zipfile.ZipFile(self.site / "downloads/bundles/cps.zip") as archive:
+            self.assertEqual(archive.namelist(), ["cps/README.md", "cps/data/sample.csv"])
+        self.assertIn("Partially available", (self.site / "SOURCE_FILES.md").read_text())
+        code.write_text("print('released')\n")
+        self.schedule["weeks"][1]["locked"] = False
+        self.save_config()
+        self.build()
+        with zipfile.ZipFile(self.site / "downloads/bundles/cps.zip") as archive:
+            self.assertIn("cps/code/analyze.py", archive.namelist())
+        self.assertFalse((self.site / "psets/pset1.pdf").exists())
+        self.schedule["weeks"][0]["locked"] = True
+        self.schedule["weeks"][1]["locked"] = True
+        self.save_config()
+        self.build()
+        self.assertFalse((self.site / "downloads/bundles/cps.zip").exists())
+        self.assertFalse((self.site / "downloads/guides/cps-README.md").exists())
+
+    def test_invalid_lock_settings_preserve_outputs(self):
+        self.build()
+        for bad in ("false", 1, None):
+            with self.subTest(bad=bad):
+                self.schedule["weeks"][0]["locked"] = bad
+                self.save_config()
+                before = self.snapshot()
+                with self.assertRaises(builder.BuildError):
+                    self.build()
+                self.assertEqual(before, self.snapshot())
+                self.schedule["weeks"][0].pop("locked")
+                self.config["materials"]["pset1"]["locked"] = bad
+                self.save_config()
+                before = self.snapshot()
+                with self.assertRaises(builder.BuildError):
+                    self.build()
+                self.assertEqual(before, self.snapshot())
+                self.config["materials"]["pset1"]["locked"] = False
+
     def test_incremental_copy_detects_same_size_same_timestamp_changes(self):
         self.build()
         before = self.snapshot()

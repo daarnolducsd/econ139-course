@@ -18,7 +18,11 @@
     const lastWeek = weeks[weeks.length - 1];
     const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
     // A short final week cannot always scroll all the way to the reading line.
-    if (atBottom && lastWeek.getBoundingClientRect().bottom > readingLine) current = lastWeek.id;
+    if (atBottom && lastWeek.getBoundingClientRect().bottom > readingLine) {
+      const target = weeks.find(week => `#${week.id}` === location.hash);
+      const bounds = target?.getBoundingClientRect();
+      current = bounds && bounds.bottom > height && bounds.top < window.innerHeight ? target.id : lastWeek.id;
+    }
     // Clear the week highlight when the reader reaches the problem-set section.
     if (lastWeek.getBoundingClientRect().bottom <= readingLine || (atBottom && location.hash === '#psets')) current = null;
     for (const link of links) {
