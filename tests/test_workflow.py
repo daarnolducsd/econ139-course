@@ -6,6 +6,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import tempfile
@@ -27,6 +28,7 @@ class CourseFixture(unittest.TestCase):
         self.site = self.root / "website"
         (self.site / "assets").mkdir(parents=True)
         (self.site / "assets/style.css").write_text("body { color: black; }\n")
+        shutil.copyfile(WEBSITE / "assets/navigation.js", self.site / "assets/navigation.js")
         self.config = {
             "course": {"title": "Test Course", "term": "Test Term",
                        "instructor": "Test Instructor", "textbook_url": "https://example.org/"},
@@ -281,7 +283,7 @@ class BuildTests(CourseFixture):
         self.build()
         page = (self.site / "index.html").read_text()
         self.assertEqual(page.count('href="downloads/code/cps/analyze.py"'), 2)
-        self.assertIn('aria-label="sample-code (PY)" download', page)
+        self.assertIn('aria-label="sample-code (Python)" download', page)
         self.config["materials"]["sample-code"]["published"] = False
         self.save_config()
         _, removed = self.build()
@@ -297,6 +299,33 @@ class BuildTests(CourseFixture):
         self.assertIn("Reading reflection", page)
         self.assertIn("Due this week", page)
         self.assertNotIn("Canvas", page)
+        self.assertNotIn("instructure.com", page)
+
+    def test_fixed_week_sections_and_grouped_downloads_preserve_individual_links(self):
+        self.add_downloads()
+        entry = self.config["materials"]["sample-data"]
+        entry["group"] = "CPS data"
+        self.config["materials"]["alternate-data"] = {
+            "title": "CPS data (Stata)", "group": "CPS data", "kind": "data",
+            "source": "data/cps/sample.dta"}
+        (self.root / "data/cps/sample.dta").write_bytes(b"test stata data")
+        self.schedule["weeks"][0]["resources"].append("alternate-data")
+        self.save_config()
+        self.build()
+        page = (self.site / "index.html").read_text()
+        headings = re.findall(r'<div class="week-group panel panel-[^\"]+"><h3>(.*?)</h3>', page)
+        self.assertEqual(headings, ["Slides", "Readings", "Assignments", "Data &amp; code"] * 10)
+        self.assertNotIn("<details", page)
+        self.assertEqual(page.count('<span>CPS data</span>'), 1)
+        for href, label in (("downloads/data/cps/sample.csv", "CSV"),
+                            ("downloads/data/cps/sample.dta", "Stata")):
+            self.assertIn(f'href="{href}" aria-label="CPS data ({label})" download', page)
+        self.config["materials"]["alternate-data"]["published"] = False
+        self.save_config()
+        self.build()
+        page = (self.site / "index.html").read_text()
+        self.assertNotIn("sample.dta", page)
+        self.assertIn("sample.csv", page)
 
     def test_topic_migration_preserves_urls_and_bundles_only_explicit_members(self):
         self.add_topic_bundle()

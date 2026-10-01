@@ -132,85 +132,99 @@
       "title": "CPS data (most programs)",
       "kind": "data",
       "source": "materials/cps/data/cps_aug_25.csv",
-      "destination": "downloads/data/cps/cps_aug_25.csv"
+      "destination": "downloads/data/cps/cps_aug_25.csv",
+      "group": "CPS data"
     },
     "cps-stata": {
       "title": "CPS data (Stata)",
       "kind": "data",
       "source": "materials/cps/data/cps_aug_25.dta",
-      "destination": "downloads/data/cps/cps_aug_25.dta"
+      "destination": "downloads/data/cps/cps_aug_25.dta",
+      "group": "CPS data"
     },
     "cps-python": {
       "title": "CPS analysis (Python)",
       "kind": "code",
       "source": "materials/cps/code/analyze.py",
-      "destination": "downloads/code/cps/analyze.py"
+      "destination": "downloads/code/cps/analyze.py",
+      "group": "CPS analysis"
     },
     "cps-stata-code": {
       "title": "CPS analysis (Stata)",
       "kind": "code",
       "source": "materials/cps/code/analyze.do",
-      "destination": "downloads/code/cps/analyze.do"
+      "destination": "downloads/code/cps/analyze.do",
+      "group": "CPS analysis"
     },
     "cps-r": {
       "title": "CPS analysis (R)",
       "kind": "code",
       "source": "materials/cps/code/analyze.R",
-      "destination": "downloads/code/cps/analyze.R"
+      "destination": "downloads/code/cps/analyze.R",
+      "group": "CPS analysis"
     },
     "acs-excel": {
       "title": "ACS healthcare data (Excel)",
       "kind": "data",
       "source": "materials/acs/data/acs_clean_healthcare.xlsx",
-      "destination": "downloads/data/acs/acs_clean_healthcare.xlsx"
+      "destination": "downloads/data/acs/acs_clean_healthcare.xlsx",
+      "group": "ACS healthcare data"
     },
     "acs-stata": {
       "title": "ACS healthcare data (Stata)",
       "kind": "data",
       "source": "materials/acs/data/acs_clean_healthcare.dta",
-      "destination": "downloads/data/acs/acs_clean_healthcare.dta"
+      "destination": "downloads/data/acs/acs_clean_healthcare.dta",
+      "group": "ACS healthcare data"
     },
     "acs-csv": {
       "title": "ACS healthcare data (most programs)",
       "kind": "data",
       "source": "materials/acs/data/acs_clean_healthcare.csv",
-      "destination": "downloads/data/acs/acs_clean_healthcare.csv"
+      "destination": "downloads/data/acs/acs_clean_healthcare.csv",
+      "group": "ACS healthcare data"
     },
     "acs-stata-code": {
       "title": "ACS healthcare analysis (Stata)",
       "kind": "code",
       "source": "materials/acs/code/acs_healthcare.do",
-      "destination": "downloads/code/acs/acs_healthcare.do"
+      "destination": "downloads/code/acs/acs_healthcare.do",
+      "group": "ACS healthcare analysis"
     },
     "acs-python": {
       "title": "ACS healthcare analysis (Python)",
       "kind": "code",
       "source": "materials/acs/code/acs_healthcare.py",
-      "destination": "downloads/code/acs/acs_healthcare.py"
+      "destination": "downloads/code/acs/acs_healthcare.py",
+      "group": "ACS healthcare analysis"
     },
     "acs-r": {
       "title": "ACS healthcare analysis (R)",
       "kind": "code",
       "source": "materials/acs/code/acs_healthcare.R",
-      "destination": "downloads/code/acs/acs_healthcare.R"
+      "destination": "downloads/code/acs/acs_healthcare.R",
+      "group": "ACS healthcare analysis"
     },
     "onet-excel": {
       "title": "O*NET work activities (Excel)",
       "kind": "data",
       "source": "materials/onet/data/work_activities.xlsx",
-      "destination": "downloads/data/onet/work_activities.xlsx"
+      "destination": "downloads/data/onet/work_activities.xlsx",
+      "group": "O*NET work activities"
     },
     "onet-stata": {
       "title": "O*NET work activities (Stata)",
       "kind": "data",
       "source": "materials/onet/data/work_activities.dta",
-      "destination": "downloads/data/onet/work_activities.dta"
+      "destination": "downloads/data/onet/work_activities.dta",
+      "group": "O*NET work activities"
     },
     "onet-csv": {
       "title": "O*NET work activities (most programs)",
       "kind": "data",
       "source": "materials/onet/data/work_activities.csv",
-      "destination": "downloads/data/onet/work_activities.csv"
+      "destination": "downloads/data/onet/work_activities.csv",
+      "group": "O*NET work activities"
     }
   },
   "syllabus": {

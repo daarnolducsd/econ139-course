@@ -93,13 +93,17 @@ def load_config(path):
         if not key or not isinstance(key, str):
             raise BuildError("Each material needs a nonempty ID")
         record(item, key, required=("title", "kind", "source"),
-               optional=("published", "solutions", "destination"))
+               optional=("published", "solutions", "destination", "group"))
         for field in ("title", "source"):
             text_field(item, field)
         if item["kind"] not in ("slides", "guide", "review", "assignment", "data", "code"):
             raise BuildError(f"{key}: kind must be slides, guide, review, assignment, data, or code")
         if "solutions" in item and item["kind"] != "assignment":
             raise BuildError(f"{key}: only assignments can have solutions")
+        if "group" in item:
+            text_field(item, "group")
+            if item["kind"] not in DOWNLOAD_EXTENSIONS:
+                raise BuildError(f"{key}: only data/code can have a download group")
         published(item)
         material_destination(item)
     bundles = config.get("bundles", {})
@@ -301,7 +305,7 @@ def collect_content(config, source_root, today=None, schedule=None):
         destination = Path(material_destination(entry))
         href = copy_file(entry, destination.parent.as_posix(), filename=destination.name,
                          allowed=DOWNLOAD_EXTENSIONS.get(kind, (".pdf",)))
-        item = {"title": entry["title"], "kind": kind,
+        item = {"title": entry["title"], "kind": kind, "group": entry.get("group", entry["title"]),
                 "href": href,
                 "sol_href": None, "sol_pending": None}
         if "solutions" in entry:
@@ -465,25 +469,45 @@ def solution_link(item):
     return ""
 
 
+def week_panel(kind, title, content):
+    content = content or '<p class="empty-section">None this week.</p>'
+    return (f'<div class="week-group panel panel-{kind}"><h3>{title}</h3>'
+            f'<div class="panel-content">{content}</div></div>')
+
+
+def download_rows(items):
+    groups = {}
+    formats = {".csv": "CSV", ".dta": "Stata", ".xlsx": "Excel",
+               ".py": "Python", ".r": "R", ".do": "Stata"}
+    order = {".csv": 0, ".dta": 1, ".xlsx": 2, ".py": 0, ".r": 1, ".do": 2}
+    for item in items:
+        groups.setdefault((item["kind"], item["group"]), []).append(item)
+    rows = []
+    for (_, title), members in groups.items():
+        links = []
+        for item in sorted(members, key=lambda item: order[Path(item["href"]).suffix.lower()]):
+            label = formats[Path(item["href"]).suffix.lower()]
+            links.append(f'<a href="{esc(item["href"])}" aria-label="{esc(title)} ({label})" download>{label}</a>')
+        links = '<span class="format-separator" aria-hidden="true">&middot;</span>'.join(links)
+        rows.append(f'<li class="material-row download-row"><span>{esc(title)}</span>'
+                    f'<div class="download-formats">{links}</div></li>')
+    return f'<ul class="material-list">{"".join(rows)}</ul>' if rows else ""
+
+
 def render(weeks, catalog, syllabus, course, bundles=()):
     jump_links = "\n".join(f'<a href="#week-{week["number"]}" aria-label="Week {week["number"]}">{week["number"]}</a>' for week in weeks)
     week_sections, used = [], set()
     for week in weeks:
-        groups = []
-        for kind, heading in (("slides", "Lecture slides"), ("guide", "Data guides"), ("review", "Review")):
-            items = []
-            for key in week["materials"]:
-                used.add(key)
-                if key in catalog and catalog[key]["kind"] == kind:
-                    items.append(material_row(catalog[key]))
-            if items:
-                groups.append(f'<div class="week-group"><h3>{heading}</h3><ul class="material-list">{"".join(items)}</ul></div>')
+        used.update(week["materials"])
+        items = [material_row(catalog[key]) for key in week["materials"] if key in catalog]
+        slides = f'<ul class="material-list">{"".join(items)}</ul>' if items else ""
+        groups = [week_panel("slides", "Slides", slides)]
         readings = []
         for entry in week.get("readings", []):
             note = f'<span class="item-note">{esc(entry["note"])}</span>' if entry.get("note") else ""
             readings.append(f'<li>{external_link(entry["title"], entry["url"])}{note}</li>')
-        if readings:
-            groups.append(f'<div class="week-group"><h3>Readings</h3><ul class="reading-list">{"".join(readings)}</ul></div>')
+        readings = f'<ul class="reading-list">{"".join(readings)}</ul>' if readings else ""
+        groups.append(week_panel("readings", "Readings", readings))
         assignments = []
         for entry in week.get("assignments", []):
             actions = []
@@ -501,20 +525,24 @@ def render(weeks, catalog, syllabus, course, bundles=()):
             note = f'<span class="item-note">{esc(entry["note"])}</span>' if entry.get("note") else ""
             assignments.append(f'<li><div class="assignment-title">{esc(title)}{note}</div>'
                                f'<div class="assignment-actions">{"".join(actions)}</div></li>')
-        if assignments:
-            groups.append(f'<div class="week-group"><h3>Assignments &amp; practice</h3><ul class="assignment-list">{"".join(assignments)}</ul></div>')
+        assignments = f'<ul class="assignment-list">{"".join(assignments)}</ul>' if assignments else ""
+        groups.append(week_panel("assignments", "Assignments", assignments))
         resources = [key for key in week.get("resources", []) if key in catalog]
         used.update(week.get("resources", []))
+        downloads = ""
         if resources:
-            links = "".join(material_row(catalog[key]) for key in resources)
             packages = []
             for bundle in bundles:
                 if set(resources).intersection(bundle["members"]):
-                    packages.append(f'<a class="pdf-link" href="{esc(bundle["href"])}" download>Download {esc(bundle["title"])} ZIP</a>'
+                    packages.append(f'<a class="pdf-link bundle-download" href="{esc(bundle["href"])}" download>Download {esc(bundle["title"])} ZIP</a>'
                                     f'<a href="{esc(bundle["readme"])}" download>{esc(bundle["title"])} instructions</a>')
-            packages = f'<div class="bundle-links">{"".join(packages)}</div>' if packages else ""
-            groups.append(f'<details class="week-group resources"><summary>Data &amp; code ({len(resources)})</summary>{packages}<ul class="material-list">{links}</ul></details>')
-        content = "".join(groups) or '<p class="empty-week">Materials will be added here.</p>'
+            downloads = f'<div class="bundle-links">{"".join(packages)}</div>' if packages else ""
+            for kind, heading in (("data", "Data files"), ("code", "Code")):
+                rows = download_rows([catalog[key] for key in resources if catalog[key]["kind"] == kind])
+                if rows:
+                    downloads += f'<div class="download-group"><h4>{heading}</h4>{rows}</div>'
+        groups.append(week_panel("downloads", "Data &amp; code", downloads))
+        content = "".join(groups)
         dates = f'<p class="week-dates">{esc(week["dates"])}</p>' if week.get("dates") else ""
         week_sections.append(f'''<section id="week-{week["number"]}" class="week" aria-labelledby="week-{week["number"]}-title">
       <div class="week-heading"><p class="week-number">Week {week["number"]}</p><h2 id="week-{week["number"]}-title">{esc(week["title"])}</h2>{dates}</div>
@@ -539,6 +567,7 @@ def render(weeks, catalog, syllabus, course, bundles=()):
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{esc(course["title"])}</title>
   <link rel="stylesheet" href="assets/style.css">
+  <script src="assets/navigation.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#schedule">Skip to weekly schedule</a>
@@ -546,7 +575,7 @@ def render(weeks, catalog, syllabus, course, bundles=()):
     <div class="wrap">
       <p class="eyebrow">UC San Diego &middot; Economics</p>
       <h1>{esc(course["title"])}</h1>
-      <p class="course-meta">{esc(course["term"])} <span aria-hidden="true">&middot;</span> {esc(course["instructor"])}</p>
+      <p class="course-meta">{esc(course["instructor"])}</p>
       <div id="textbook" class="course-resources">{syllabus_link}{external_link("Textbook", course["textbook_url"], "resource-link")}</div>
     </div>
   </header>

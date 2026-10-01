@@ -73,7 +73,7 @@ pointed to Chapter 3 in Canvas; its link now targets `04.html`, matching the loc
 textbook's Monopsony Theory chapter.
 
 The generated page uses separate week cards, compact PDF rows, numbered sticky
-navigation, a problem-set download section, and expandable data/code panels.
+navigation, a problem-set download section, and four consistently placed panels.
 The palette is warm off-white, charcoal, and muted green. Reading/textbook links open new tabs with accessible labels; data/code links
 download files directly.
 
@@ -152,4 +152,32 @@ real pandas data and real plotting libraries. Analysis inputs remain unchanged.
 
 The final local build validates 43 public files: 23 PDFs, 14 data/code files,
 three README downloads, and three ZIPs. An unchanged rebuild reports zero changes.
-The migration was verified locally; the live website has not been updated.
+The migration was committed as 7704a70 and pushed; its GitHub Pages build was
+verified as complete.
+
+## Consistent weekly panels and navigation
+
+The selected two-by-two layout is now implemented in the actual site renderer
+and stylesheet. Every week retains Slides, Readings, Assignments, and Data & code
+in that order, with an explicit empty state when needed. On narrow screens the
+panels stack. The selected soft stone palette uses a #F0F0EC page background and
+the same lighter #FAFAF7 background for every week card. Headers use slate gray,
+sand, dusty mauve, and eucalyptus;
+data/code downloads remain visible without a dropdown.
+
+Optional data/code `group` labels in course.json combine alternate formats into
+one row while preserving every source and public URL. Topic ZIPs and instructions
+remain prominent above the individual links. Navigation uses a small deferred
+script to mark the week at the top of the reading area with aria-current; it does
+not require changes when content moves between weeks. At the user's request,
+the header omits the term and the Canvas submission note; the term is retained
+only as internal course metadata. The user approved this complete layout and
+palette for publication.
+
+Validation: 31 isolated workflow tests pass, all 43 approved public files and
+local links validate, and an unchanged rebuild writes nothing. A separate
+headless Chrome session verified the grid at 1280px, stacked panels at 375px and
+320px, no horizontal overflow, all ten active-week states, and clearing the
+highlight through the Problem sets navigation. Native anchors and the ACS
+download links also work with JavaScript disabled. Desktop and mobile screenshots
+were inspected; the local browser-check artifacts are outside the website repo.
