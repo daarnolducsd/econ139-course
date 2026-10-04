@@ -212,3 +212,17 @@ were removed, with originals untouched. Browser checks at 1280px, 375px, and
 320px verified nine locked cards, three locked assignment rows, all ten navigation
 targets, no horizontal overflow, and no locked-content links with JavaScript
 disabled. Desktop and mobile screenshots were inspected.
+
+## Labor poster redesign
+
+The approved poster preview is now the main design: white background, oversized
+uppercase course title, a tilted ECON 139 label, warm vermilion (#df5145), darker
+red links (#b8322b), and open material lists separated by rules. Week numbers sit
+in a left column on desktop; content stacks on phones. The renderer splits the
+configured course title into course code and name; previews remain outside the
+published repository. Navigation, public paths, and release settings are unchanged.
+
+Validation: all 35 workflow tests pass; the build validates the same eight
+approved public files. Chrome checks at 1440px, 375px, and 320px confirm no
+horizontal overflow, working navigation, nine locked weeks, three locked problem
+sets, and existing local link targets. Desktop and phone screenshots were inspected.

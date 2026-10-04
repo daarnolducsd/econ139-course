@@ -620,6 +620,9 @@ def render(weeks, catalog, syllabus, course, bundles=()):
     assignment_section = (f'<section id="psets" class="resource-section"><h2>Problem sets</h2><ul class="material-list">{"".join(assignments)}</ul></section>'
                           if assignments else '<div id="psets"></div>')
     extra_section = (f'<section class="resource-section"><h2>Additional materials</h2><ul class="material-list">{"".join(extras)}</ul></section>' if extras else "")
+    course_code, separator, course_name = course["title"].partition(": ")
+    heading = (f'<span class="course-code">{esc(course_code)}</span> <span class="course-name">{esc(course_name)}</span>'
+               if separator else esc(course["title"]))
     syllabus_link = f'<a class="resource-link" href="{esc(syllabus)}">Syllabus PDF</a>' if syllabus else ""
     return f'''<!DOCTYPE html>
 <html lang="en">
@@ -635,7 +638,7 @@ def render(weeks, catalog, syllabus, course, bundles=()):
   <header class="course-header">
     <div class="wrap">
       <p class="eyebrow">UC San Diego &middot; Economics</p>
-      <h1>{esc(course["title"])}</h1>
+      <h1>{heading}</h1>
       <p class="course-meta">{esc(course["instructor"])}</p>
       <div id="textbook" class="course-resources">{syllabus_link}{external_link("Textbook", course["textbook_url"], "resource-link")}</div>
     </div>

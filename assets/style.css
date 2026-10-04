@@ -104,3 +104,73 @@ footer { padding: 1.8rem 0; margin-top: 2rem; border-top: 1px solid var(--border
   .assignment-actions { max-width: 48%; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* White, unboxed course layout. */
+:root { --paper:#fff; --surface:#fff; --ink:#191919; --muted:#606060; --accent:#191919; --border:#d5d5d5; --week-background:#fff; --tint:#fff; }
+body { background:white; }
+.wrap { max-width:1200px; padding-inline:40px; }
+.course-code, .course-name { display:block; }
+.course-code { font:700 14px/1.4 Arial,sans-serif; letter-spacing:.06em; margin-bottom:14px; }
+.resource-link, .pdf-link, .bundle-download { border:0; border-radius:0; padding:0; background:none; color:var(--accent); text-decoration:underline; text-underline-offset:4px; }
+.resource-link:hover, .pdf-link:hover, .bundle-download:hover { background:none; color:var(--accent); filter:none; }
+.course-resources { gap:24px; }
+.week { border:0; border-radius:0; overflow:visible; margin:0; border-top:1px solid var(--ink); }
+.week-heading { padding:25px 0 20px; border:0; }
+.week-content { padding:0 0 35px; gap:26px 44px; }
+.panel { border:0; border-radius:0; background:none; overflow:visible; }
+.panel h3 { padding:0 0 10px; border:0; border-bottom:1px solid var(--ink); background:none; font-size:12px; text-transform:uppercase; letter-spacing:.08em; }
+.panel-content { padding:10px 0 0; }
+.material-row { padding:9px 0; }
+.lock-badge { padding:0; background:none; border:0; border-radius:0; font-weight:400; }
+.lock-icon { display:none; }
+.week-locked .week-heading { padding:23px 0 6px; }
+.locked-message { padding:0 0 23px; font-size:12px; }
+.week-nav { border-block-color:var(--ink); }
+.week-nav .wrap { gap:20px; }
+.week-jumps a { border-radius:0; }
+.week-jumps a[aria-current=location] { color:var(--accent); background:none; box-shadow:inset 0 -2px var(--accent); }
+.week-jumps a[aria-current=location]:hover { color:var(--accent); background:none; }
+.schedule-heading { padding:36px 0 26px; }
+.resource-section { border-top:2px solid var(--ink); }
+.bundle-links { gap:10px 20px; }
+a:focus-visible { outline:2px solid var(--accent); outline-offset:5px; }
+@media(max-width:760px) {
+ .wrap { padding-inline:22px; }
+ .week-nav .wrap { gap:5px; }
+ .week-content { grid-template-columns:1fr; }
+ .week h2 { font-size:22px; }
+ .course-header { padding-block:36px; }
+ .material-row { gap:12px; }
+ .pdf-link { font-size:11px; }
+}
+/* Labor poster typography and warm vermilion accents. */
+:root { --accent:#b8322b; --poster-red:#df5145; }
+body { font-family:Arial,Helvetica,sans-serif; }
+.course-header { padding:40px 0 32px; }
+.course-header .wrap { display:grid; grid-template-columns:180px 1fr; column-gap:30px; }
+.eyebrow { grid-column:1; grid-row:1/4; padding-top:8px; max-width:135px; font-size:12px; line-height:1.8; color:#111; }
+h1 { grid-column:2; font-size:clamp(58px,9.7vw,132px); line-height:.83; font-weight:900; letter-spacing:-.085em; text-transform:uppercase; }
+.course-name { max-width:850px; overflow-wrap:normal; }
+.course-code { display:inline-block; color:#191919; background:var(--poster-red); padding:8px 12px; transform:rotate(-4deg); margin:0 0 28px -4px; font-size:20px; letter-spacing:-.03em; }
+.course-meta { grid-column:2; margin:25px 0 15px; color:#111; }
+.course-resources { grid-column:2; }
+.week-nav { border-top:8px solid var(--poster-red); border-bottom:2px solid #111; }
+.schedule-heading h2 { font-size:15px; text-transform:uppercase; letter-spacing:.02em; }
+.schedule-heading p { font-size:13px; }
+.week { position:relative; padding-left:210px; }
+.week-number { position:absolute; left:0; top:24px; color:var(--poster-red); font-size:38px; line-height:1; font-weight:900; letter-spacing:-.07em; text-transform:uppercase; }
+.week h2 { font-size:34px; line-height:1.05; font-weight:800; letter-spacing:-.055em; }
+.week-content { gap:26px 40px; }
+.week-locked h2 { font-size:25px; }
+.week-locked .week-number { top:22px; }
+.locked-message { padding-bottom:24px; }
+.panel h3 { color:var(--accent); border-bottom-color:#b8b8b8; }
+.resource-section { padding-left:210px; }
+@media(max-width:760px) {
+ .course-header .wrap { display:block; }
+ .eyebrow { max-width:none; margin-bottom:25px; }
+ .week, .resource-section { padding-left:0; }
+ .week-number { position:static; color:var(--accent); font-size:16px; margin-bottom:10px; }
+ h1 { font-size:clamp(40px,10.9vw,82px); }
+ .course-code { font-size:17px; }
+}
